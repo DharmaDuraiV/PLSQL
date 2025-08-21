@@ -102,27 +102,73 @@ END;
 /
 
 
+example 
+
+CREATE TABLE SBI_Bank (
+    Account_No     NUMBER(12) PRIMARY KEY,
+    Customer_Name  VARCHAR2(50),
+    Account_Type   VARCHAR2(20),
+    Balance        NUMBER(12,2),
+    Branch_Name    VARCHAR2(50),
+    City           VARCHAR2(50)
+);
+
+INSERT INTO SBI_Bank VALUES (1001, 'Tony Stark', 'Savings', 150000.50, 'MG Road', 'Bangalore');
+INSERT INTO SBI_Bank VALUES (1002, 'Steve Rogers', 'Current', 120000.00, 'Anna Nagar', 'Chennai');
+INSERT INTO SBI_Bank VALUES (1003, 'Thor Odinson', 'Savings', 250000.75, 'Gandhi Nagar', 'Delhi');
+INSERT INTO SBI_Bank VALUES (1004, 'Bruce Banner', 'Salary', 95000.25, 'Banjara Hills', 'Hyderabad');
+INSERT INTO SBI_Bank VALUES (1005, 'Natasha Romanoff', 'Savings', 78000.10, 'Race Course', 'Coimbatore');
+INSERT INTO SBI_Bank VALUES (1006, 'Clint Barton', 'Current', 67000.00, 'RS Puram', 'Coimbatore');
+INSERT INTO SBI_Bank VALUES (1007, 'Wanda Maximoff', 'Savings', 134000.80, 'Whitefield', 'Bangalore');
+INSERT INTO SBI_Bank VALUES (1008, 'Vision', 'Salary', 200000.00, 'Cyberabad', 'Hyderabad');
+INSERT INTO SBI_Bank VALUES (1009, 'Peter Parker', 'Savings', 56000.35, 'Adyar', 'Chennai');
+INSERT INTO SBI_Bank VALUES (1010, 'Stephen Strange', 'Current', 175000.90, 'Connaught Place', 'Delhi');
+
+-- Commit changes
+COMMIT;
+
 Write a PL/SQL block that declares a user-defined exception called insufficient_balance
 and raises it when a withdrawal amount exceeds the balance
 
-declare 
- v_withdraw_amt number :=&amt ;
- v_empno number :=&empno ;
- v_old_balance number ;
- z exception ;
-begin  
- select sal into v_old_balance
- from emp
- where empno = v_empno;
-   if v_old_balance <= v_withdraw_amt then
-     raize z ;
-   else 
-     update emp
-     set sal=v_old_balance- v_withdraw_amt 
-     where empno =v_empno;
-      dbms_output.put_line('total balance :'||v_old_balance- v_withdraw_amt);
-  end if;
-exception 
- when z then 
-   dbms_output.put_line(' transactation faild due to insufficient_balance' :||v_old_balance);
-end ;
+
+DECLARE
+    v_account_no     NUMBER := &account_no;   -- Account number from user
+    v_withdraw_amt   NUMBER := &amount;      -- Withdrawal amount from user
+    v_old_balance    NUMBER;                  -- Current balance holder
+
+    z EXCEPTION;  -- User-defined exception (Insufficient Balance)
+BEGIN
+    -- Fetch the balance of the given account
+    SELECT Balance
+    INTO v_old_balance
+    FROM SBI_Bank
+    WHERE Account_No = v_account_no;
+
+    DBMS_OUTPUT.PUT_LINE('Account No: ' || v_account_no);
+    DBMS_OUTPUT.PUT_LINE('Current Balance: ' || v_old_balance);
+    DBMS_OUTPUT.PUT_LINE('Withdrawal Amount: ' || v_withdraw_amt);
+
+    -- Check condition
+    IF v_withdraw_amt > v_old_balance THEN
+        RAISE z;  -- Raise user-defined exception
+    ELSE
+        v_old_balance := v_old_balance - v_withdraw_amt;
+
+        UPDATE SBI_Bank
+        SET Balance = v_old_balance
+        WHERE Account_No = v_account_no;
+
+        DBMS_OUTPUT.PUT_LINE('Withdrawal Successful!');
+        DBMS_OUTPUT.PUT_LINE('Updated Balance: ' || v_old_balance);
+    END IF;
+
+EXCEPTION
+    WHEN z THEN
+        DBMS_OUTPUT.PUT_LINE('Error: Insufficient Balance. Transaction Failed!');
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Error: Account not found.');
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Unexpected Error: ' || SQLERRM);
+END;
+/
+
