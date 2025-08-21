@@ -1,55 +1,96 @@
 STORED PROCEDURES:-
 --------------------------
+🔹 A Stored Procedure is a named block of SQL and PL/SQL statements.
+🔹 Once created, it is saved permanently in the database. 
+🔹 It is precompiled and stored in advance, so execution is faster.
+🔹 It can accept parameters: 
+      🔹 IN → Used to pass input values
+      🔹 OUT → Used to return output values
+      🔹 IN OUT → Used for both input and output 
+🔹 It can perform tasks such as INSERT, UPDATE, DELETE, and SELECT.
+🔹 It may or may not return a value.
+🔹 It is reusable – once written, it can be executed multiple times without rewriting the code.
 
-A STORED PROCEDURE IS ALSO A NAMED PL/SQL BLOCK THE ACCEPTS SOME INPUT IN THE FORM OF PARAMETERS AND PERFORMS SOME TASK AND MAY OR MAY NOT RETURNS A VALUE
+Advantages of Stored Procedure
 
-PROCEDURES ARE CREATED TO PERFORM ONE OR MORE DML OPERATIONS OVER DATABASE
+🔹 Reusable – Write the procedure once and use it in multiple programs without rewriting code
+🔹 Faster Execution – Precompiled in the database, so it runs faster than normal SQL statements
+🔹 Improved Security – Users access data only through the procedure, preventing unauthorized table access
+🔹 Easy Maintenance – Update the logic in one place, and changes apply wherever the procedure is used
+🔹 Reduced Network Traffic – Only procedure calls are sent over the network, saving bandwidth
+🔹 Consistency – Ensures the same business logic is applied every time, reducing errors
 
-PROCEDURE HAVING 2 PARTS :
 
-1)PROCEDURE SPECIFICATION
-2)PROCEDURE BODY
+--------------------------
 
+Procedures are created to perform one or more DML operations (INSERT, UPDATE, DELETE, SELECT) on the database.
+A Procedure has 2 parts:
+Procedure Specification (Header) – Specifies the name of the procedure and the type of parameters.
+Procedure Body – Contains the actual code to perform the required tasks.
 
-IN PROCEDURE SPECIFICATION WE ARE SPECIFYING NAME OF THE PEOCEDURE AND TYPE OF PARAMETERS
-WHERE AS PROCEDURE BODY WE ARE SOLVING THE ACTUAL TASK
+Syntax
 
-SYNTAX:
-
-CREATE OR REPLACE PROCEDURE PROCEDURE_NAME( IF ANY PARAMETERS )
-IS
-<VARIABLES,CURSOR>;
+CREATE [OR REPLACE] PROCEDURE procedure_name
+(
+   param1 MODE datatype,   -- MODE = IN, OUT, IN OUT (optional)
+   param2 MODE datatype
+)
+IS/AS
+ varciable, cursor , exception..etc
 BEGIN
-STATEMENTS ;
-END ;
+   -- SQL / PL/SQL statements to perform tasks
+EXCEPTION
+   WHEN others THEN
+      -- Handle errors (optional)
+END [procedure_name];
+/
 
+Explaination 
+🔹 CREATE PROCEDURE → Creates a new procedure in the database
+🔹 [OR REPLACE] → Optional; replaces the existing procedure if it already exists
+🔹 procedure_name → Name of your procedure
+🔹 MODE → Replace with IN, OUT, or IN OUT
+      🔹 IN → Pass input value into the procedure
+      🔹 OUT → Return value from the procedure
+      🔹 IN OUT → Pass value in and get output value back
+🔹 IS / AS → Used to start the procedure block
+🔹 You can declare local variables
+🔹 You can declare cursors for fetching rows from tables
+🔹 BEGIN … END → Main executable section where SQL or PL/SQL statements are written
+🔹 EXCEPTION [Optional] → Handles runtime errors that may occur in the procedure
+🔹 END [procedure_name] → Marks the end of the procedure
 
 *****************************************************
 
 EXECUTING A PROCEDURE
 ---------------------
 
-METHOD 1:
-SQL> EXEC[UTE] PROCEDURENAME(ACTUAL PARAMETERS);
+Method 1: Using EXEC or EXECUTE command
+
+syntax :
+    EXEC[UTE] PROCEDURENAME(ACTUAL PARAMETERS);
 
 ****************************
 
-METHOD 2:( USING ANNONYMOUS BLOCK)
-SQL>    BEGIN
-PROCEDURE (ACTUAL PARAMETERS);
-END;
-/
+🔹 Method 2: Using an Anonymous PL/SQL Block
 
+syntax :
+
+     BEGIN
+        procedure_name(actual_parameters);
+     END;
+     /
 ***************************
 
-METHOD 3:
-SQL> CALL PROCEDURENAME (ACTUAL PARAMETERS);
+🔹 Method 3: Using the CALL statement
+syntax :
+      CALL procedure_name(actual_parameters);
 
 ***************************************************
 
-HOW TO DROP THE PROCEDURES
-
-DROP PROCRDURE PROCEDURE_NAME;
+Dropping a Procedure
+syntax :
+      DROP PROCRDURE PROCEDURE_NAME;
 
 *****************************************************
 
@@ -59,6 +100,7 @@ SELECT TEXT
 FROM USER_SOURCE
 WHERE NAME='PROCEDURE_NAME';
 
+PROCEDURE_NAME → Replace with the name of the procedure you want to view
 *****************************************************
 
 EXAMPLE :1
