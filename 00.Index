@@ -5,20 +5,21 @@ What is an Index?
    - It works similarly to an index in a book, helping you quickly locate specific rows.
    - Indexes are automatically created on primary key and unique key columns.
 
-Types of Indexes:
-------------------------------
-   - Single-column Index: Created on one column.
-   - Composite Index : Created on multiple columns.
-   - Unique Index : Ensures values in the indexed column(s) are unique.
-
 
 Advantages of Indexes:
 ---------------------------
    - Faster Query Performance: Speeds up data retrieval, especially for SELECT queries with WHERE clauses.
-   - Efficient Searching: Reduces full table scans for searches
+   - Can be unique or non-unique.
 
-
-------------------------------X-----------------------------------------
+***********************************************************************************
+      Types of Index 
+           1. Single-Column Index
+           2. Composite (Multi-Column) Index
+           3. Unique Index
+           4. Function-Based Index
+           5. Reverse Index (Reverse Key Index)
+           6. Bitmap Index
+------------------------------------------------------------------------
 
 -- Single-column Index:
 ************************
