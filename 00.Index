@@ -112,6 +112,17 @@ OR
    CREATE INDEX idx_Annual_salary
    ON emp(sal*12);
 
+****************************************************************************************************************************
+
+Bitmap Index (special case, but also non-clustered)
+
+Stores rowids as bitmaps.
+Best for low-cardinality columns (like Gender, Yes/No, Status).
+
+Example:
+
+CREATE BITMAP INDEX idx_emp_gender
+ON employees(gender);
 
 ****************************************************************************************************************************
 cluster :- 
