@@ -127,7 +127,8 @@ of
 select greeting(ename)
 from emp;
 
-***************************
+*****************************************************************************************************
+
 🔹 Write a PL/SQL function GET_SALARY that: Accepts an employee number as input Returns the salary of that employee from the EMP table
 
 create or replace function get_salary(eid number)
@@ -141,7 +142,7 @@ begin
   return v_sal ;
 end ;
 /
-***************************
+*****************************************************************************************************
 🔹What will be the output of the following PL/SQL block, assuming the function sum_values is already created as shown below?
 
 create or replace function sum_values(a int,b int)
@@ -151,7 +152,8 @@ begin
  return a+b 
 end sum_values ;
 /
-***************************
+
+**************************************************************************
 
 🔹 Write a PL/SQL function that takes a department number as input, iterates through employees using a cursor, and returns the name of an employee belonging to the given department.
 
@@ -175,7 +177,8 @@ begin
  return v_result ;
 end;
 /
-*********************************
+
+**************************************************************************
 🔹 Write a function FIRST_CHAR that takes a string as input and returns its first character.
 
 CREATE OR REPLACE FUNCTION FIRST_CHAR(p_text IN VARCHAR2)
@@ -212,7 +215,7 @@ J
 M
 
 
-***************************
+**************************************************************************
 
 ASSIGNMENTS : 
 
