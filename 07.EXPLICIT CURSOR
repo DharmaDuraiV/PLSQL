@@ -2,8 +2,7 @@
 EXPLICIT CURSOR :
 * For Sql Statements Return A Multiple Records Is Called Explicit Cursors .
 * Explicit Cursor Is Also Called As Active Set Memory Area .
-* In Explicit Cursor We Are Storing The Multiple Records And 
-Also These Records Are Controlled By The Database Developers Explicitly But The Database Developers Cannot Control The Implicit Cursor Memory Area .
+* In Explicit Cursor We Are Storing The Multiple Records And Also These Records Are Controlled By The Database Developers Explicitly But The Database Developers Cannot Control The Implicit Cursor Memory Area .
 
 EXPLICIT CURSOR LIFECYCLE
 
