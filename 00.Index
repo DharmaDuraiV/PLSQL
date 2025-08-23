@@ -1,20 +1,25 @@
 What is an Index? 
 
-   - Index is a database object that improves query performance by providing quick access to rows in a table.
-   - It allows faster retrieval of data, especially for large tables.
-   - It works similarly to an index in a book, helping you quickly locate specific rows.
-   - Indexes are automatically created on primary key and unique key columns.
+   🔹Index is a database object that improves query performance by providing quick access to rows in a table.
+   🔹 It allows faster retrieval of data, especially for large tables.
+   🔹 It works similarly to an index in a book, helping you quickly locate specific rows.
+   🔹 Indexes are automatically created on primary key and unique key columns.
 
 
 Advantages of Indexes:
 ---------------------------
-   - Faster Query Performance: Speeds up data retrieval, especially for SELECT queries with WHERE clauses.
-   - Can be unique or non-unique.
+    🔹 Faster Query Performance: Speeds up data retrieval, especially for SELECT queries with WHERE clauses.
+    🔹 Can be unique or non-unique.
 
 Types of Index :
    🔹Clustered Index
    🔹Non-Clustered Index
-
+----------------------------------------------------------------------------------
+Non-Clustered Index:
+    🔹 A non-clustered index is an index structure that is stored separately from the table data.
+    🔹 It contains index keys + ROWID pointers to the actual rows in the table.
+    🔹 When a query uses the index, Oracle first looks up the ROWID in the index → then retrieves the actual row from the table.
+    🔹In Oracle, every normal index you create with CREATE INDEX is non-clustered by default.
 
      Types of Index 
            1. Single-Column Index
@@ -25,8 +30,9 @@ Types of Index :
            6. Bitmap Index
 ------------------------------------------------------------------------
 
--- Single-column Index:
+1️⃣ Single-column Index:
 ************************
+🔹 Built on one column.
 🔹 Allows duplicate values.
 🔹 Used to improve performance of queries (WHERE conditions).
 
@@ -43,7 +49,7 @@ Examples
 
 ****************************************************************************************************************************
 
-   -Composite Index (on multiple columns):
+2️⃣ Composite Index (on multiple columns):
 ----------------------------------------------
 
    🔹 Built on multiple columns.
@@ -62,7 +68,7 @@ Examples
 
 ****************************************************************************************************************************
 
-   - Unique Index:
+3️⃣ Unique Index:
 --------------------
 
 🔹 Ensures no duplicate values in the column(s).
@@ -91,7 +97,7 @@ Examples
    INSERT INTO CUST VALUES (1, 'C' ,'MANDYA' );
 
 ****************************************************************************************************************************
-   -Function-Based Index
+4️⃣ Function-Based Index
    ----------------------
 
   🔹 Index created on an expression or function of a column.
@@ -113,19 +119,42 @@ OR
    ON emp(sal*12);
 
 ****************************************************************************************************************************
+5️⃣ Reverse Index (Reverse Key Index)
 
-Bitmap Index (special case, but also non-clustered)
+   🔹 Stores index key values in reverse byte order.
+   🔹 Helps avoid block contention when inserting sequential values (like from a sequence).
 
-Stores rowids as bitmaps.
-Best for low-cardinality columns (like Gender, Yes/No, Status).
+Syntax:
+
+   CREATE INDEX index_name
+   ON table_name(column_name) REVERSE;
+
 
 Example:
 
-CREATE BITMAP INDEX idx_emp_gender
-ON employees(gender);
+   CREATE INDEX idx_emp_rev
+   ON emp(empno) REVERSE;
 
 ****************************************************************************************************************************
-cluster :- 
+
+6️⃣ Bitmap Index
+
+  🔹 Stores rowids as bitmaps (0/1).
+  🔹 Very efficient for low-cardinality columns (few distinct values, e.g., Gender, Status).
+
+Syntax:
+
+   CREATE BITMAP INDEX index_name
+   ON table_name(column_name);
+
+
+Example:
+
+   CREATE BITMAP INDEX idx_emp_gender
+   ON employees(gender);
+
+****************************************************************************************************************************
+Cluster :- 
    A Cluster is a Database object that allows storing data from two or more tables together in the same data block based on common column(s).
    Improves performance of queries that join related tables frequently.
    Reduces I/O operations by keeping related rows physically close.
