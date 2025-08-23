@@ -204,6 +204,59 @@ EXCEPTION
 END INSERT_DEPT_RECORD;
 /
 ************************************************************************
+
+Notes :
+      In subprograms (procedures/functions) cannot use commit the main transaction directly
+      In Oracle, DML operations (INSERT, UPDATE, DELETE) are part of a transaction.
+      Subprograms (procedures/functions) run inside the calling transaction by default.
+      If you try to TCL operation inside a normal procedure or function, it affects the calling transaction.
+
+Example :
+
+lets create the normal procedure to update the employees salary based on the employee number.
+
+WAQTD EMPNO AND SALARY OF ALL THE EMPLOYEE AND ARRANGE THE SALARY IN ASCENDING ORDER :
+
+SELECT EMPNO , SAL
+FROM EMP
+ORDER BY SAL
+/
+
+     EMPNO        SAL
+---------- ----------
+      7369        800
+      7900        950
+      7876       1100
+      7521       1250
+
+
+normal procedure:
+
+      create or replace procedure emp_salary_update( p_empno number)
+      is 
+      begin 
+            update emp
+            set sal =sal+100
+            where empno=p_empno ;
+                  rollback ;
+      end ;
+      /
+
+calling program :
+
+      BEGIN 
+         update emp 
+         set sal=sal+100
+         where empno =  7369;
+             emp_salary_update( 7900 );
+         commit ;
+      END ;
+      /
+
+NOTES : 
+      EXIST OUTPUT   --> : 7369  SALARY IS 800 AND 7900 SALARY IS 950
+      NEW OUTPUT     --> : 7369  SALARY IS 800 AND 7900 SALARY IS 950
+
 Assignments
 
 🔹WRITE A PLSQL STORE PROCEDURE to update salary of all
