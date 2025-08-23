@@ -12,6 +12,70 @@ Advantages of Indexes:
    - Can be unique or non-unique.
 
 ***********************************************************************************
+cluster :- 
+   A Cluster is a Database object that allows storing data from two or more tables together in the same data block based on common column(s).
+   Improves performance of queries that join related tables frequently.
+   Reduces I/O operations by keeping related rows physically close.
+   Efficient storage for related rows.
+
+Step 1: Create the Cluster (define cluster key)
+-----------------------------------------------
+
+CREATE CLUSTER emp_dept_cluster (
+  deptno NUMBER(2)
+);
+
+Step 2: Create Cluster Index (required for INDEX cluster)
+-----------------------------------------------
+
+CREATE INDEX idx_emp_dept_cluster
+ON CLUSTER emp_dept_cluster;
+
+Step 3: Create Tables inside the Cluster
+-----------------------------------------------
+
+CREATE TABLE dept44 (
+  deptno NUMBER(2) PRIMARY KEY,
+  dname  VARCHAR2(14),
+  loc    VARCHAR2(13)
+) CLUSTER emp_dept_cluster (deptno);
+
+CREATE TABLE emp44 (
+  empno  NUMBER(4) PRIMARY KEY,
+  ename  VARCHAR2(10),
+  job    VARCHAR2(9),
+  deptno NUMBER(2) NOT NULL
+) CLUSTER emp_dept_cluster (deptno);
+
+Step 4: Insert Sample Data
+-----------------------------------------------
+
+INSERT INTO dept44 VALUES (10, 'ACCOUNTING', 'NEW YORK');
+INSERT INTO dept44 VALUES (20, 'RESEARCH',   'DALLAS');
+
+INSERT INTO emp44 VALUES (7369, 'SMITH',  'CLERK',   20);
+INSERT INTO emp44 VALUES (7499, 'ALLEN',  'SALESMAN',10);
+INSERT INTO emp44 VALUES (7521, 'WARD',   'SALESMAN',10);
+INSERT INTO emp44 VALUES (7566, 'JONES',  'MANAGER', 20);
+COMMIT;
+
+Step 5: Query (joins benefit from clustering)
+-----------------------------------------------
+
+SELECT *
+FROM   emp e
+JOIN   dept d ON d.deptno = e.deptno
+ORDER BY d.deptno, e.empno;
+
+Step 6: Drop Objects
+-----------------------------------------------
+DROP TABLE emp PURGE;
+DROP TABLE dept PURGE;
+DROP INDEX idx_emp_dept_cluster;
+DROP CLUSTER emp_dept_cluster INCLUDING TABLES;
+
+
+***********************************************************************************
       Types of Index 
            1. Single-Column Index
            2. Composite (Multi-Column) Index
