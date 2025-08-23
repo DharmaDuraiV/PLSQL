@@ -11,7 +11,109 @@ Advantages of Indexes:
    - Faster Query Performance: Speeds up data retrieval, especially for SELECT queries with WHERE clauses.
    - Can be unique or non-unique.
 
-***********************************************************************************
+Types of Index :
+   🔹Clustered Index
+   🔹Non-Clustered Index
+
+
+     Types of Index 
+           1. Single-Column Index
+           2. Composite (Multi-Column) Index
+           3. Unique Index
+           4. Function-Based Index
+           5. Reverse Index (Reverse Key Index)
+           6. Bitmap Index
+------------------------------------------------------------------------
+
+-- Single-column Index:
+************************
+🔹 Allows duplicate values.
+🔹 Used to improve performance of queries (WHERE conditions).
+
+Syntax:
+
+     CREATE INDEX index_name
+     ON table_name (column_name);
+
+Examples 
+---------
+
+     CREATE INDEX index_sal
+     ON emp (sal);
+
+****************************************************************************************************************************
+
+   -Composite Index (on multiple columns):
+----------------------------------------------
+
+   🔹 Built on multiple columns.
+   🔹 Order of columns matters in query optimization.
+
+Syntax :
+
+     CREATE INDEX index_name
+     ON table_name (column_name1, column_name2);
+
+Examples 
+--------
+
+     CREATE INDEX ind_name_dno
+     ON emp (ename, deptno);
+
+****************************************************************************************************************************
+
+   - Unique Index:
+--------------------
+
+🔹 Ensures no duplicate values in the column(s).
+🔹 Usually created automatically when you define a PRIMARY KEY or UNIQUE constraint.
+
+Syntax:
+
+     CREATE UNIQUE INDEX index_name
+     ON table_name (column_name);
+
+Examples
+---------
+
+    CREATE TABLE CUST 
+    (
+    CID NUMBER(4) ;
+    CNAME VARCHAR(20) ,
+    ADDRESS VARCHAR(50) 
+   ) ;
+
+     CREATE UNIQUE INDEX IND_CUST_CID
+     ON CUST (CID) ;
+
+   INSERT INTO CUST VALUES (1 ,'A' ,'BANGALORE');
+   INSERT INTO CUST VALUES (2 , 'B' ,'CHENNAI' );
+   INSERT INTO CUST VALUES (1, 'C' ,'MANDYA' );
+
+****************************************************************************************************************************
+   -Function-Based Index
+   ----------------------
+
+  🔹 Index created on an expression or function of a column.
+  🔹 Useful when queries use functions on columns.
+
+Syntax :
+
+   CREATE INDEX Index_name
+   ON Table_Name(SRF(COL_NAME)/EXPRESSION);
+
+EXAMPLE :
+
+   CREATE INDEX idx_upper_name
+   ON emp(UPPER(ename));
+
+OR 
+
+   CREATE INDEX idx_Annual_salary
+   ON emp(sal*12);
+
+
+****************************************************************************************************************************
 cluster :- 
    A Cluster is a Database object that allows storing data from two or more tables together in the same data block based on common column(s).
    Improves performance of queries that join related tables frequently.
@@ -80,67 +182,7 @@ DROP CLUSTER emp_dept_cluster INCLUDING TABLES;
 
 
 ***********************************************************************************
-      Types of Index 
-           1. Single-Column Index
-           2. Composite (Multi-Column) Index
-           3. Unique Index
-           4. Function-Based Index
-           5. Reverse Index (Reverse Key Index)
-           6. Bitmap Index
-------------------------------------------------------------------------
-
--- Single-column Index:
-************************
-
-     CREATE INDEX index_name
-     ON table_name (column_name);
-
-Examples 
----------
-
-    CREATE INDEX index_sal
-     ON emp (sal);
-
-
-------------------------------X-----------------------------------------
-
-   -Composite Index (on multiple columns):
-******************************************
-    
-     CREATE INDEX index_name
-     ON table_name (column_name1, column_name2);
-
-Examples 
---------
-
-  CREATE INDEX ind_name_dno
-     ON emp (ename, deptno);
-
-------------------------------X-----------------------------------------
-
-   - Unique Index:
-***********************
-    
-     CREATE UNIQUE INDEX index_name
-     ON table_name (column_name);
-
-Examples
----------
-
-    CREATE TABLE CUST 
-    (
-    CID NUMBER(4) ;
-    CNAME VARCHAR(20) ,
-    ADDRESS VARCHAR(50) 
-   ) ;
-
-     CREATE UNIQUE INDEX IND_CUST_CID
-     ON CUST (CID) ;
-
-   INSERT INTO CUST VALUES (1 ,'A' ,'BANGALORE');
-   INSERT INTO CUST VALUES (2 , 'B' ,'CHENNAI' );
-   INSERT INTO CUST VALUES (1, 'C' ,'MANDYA' );
-
+ 
 
 
 
