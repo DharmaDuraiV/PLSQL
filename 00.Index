@@ -34,17 +34,21 @@ ON CLUSTER emp_dept_cluster;
 Step 3: Create Tables inside the Cluster
 -----------------------------------------------
 
+-- Dept table inside cluster
 CREATE TABLE dept44 (
   deptno NUMBER(2) PRIMARY KEY,
   dname  VARCHAR2(14),
   loc    VARCHAR2(13)
 ) CLUSTER emp_dept_cluster (deptno);
 
+-- Emp table inside cluster with foreign key
 CREATE TABLE emp44 (
   empno  NUMBER(4) PRIMARY KEY,
   ename  VARCHAR2(10),
   job    VARCHAR2(9),
-  deptno NUMBER(2) NOT NULL
+  deptno NUMBER(2) NOT NULL,
+  CONSTRAINT fk_emp_dept FOREIGN KEY (deptno) 
+     REFERENCES dept44(deptno)
 ) CLUSTER emp_dept_cluster (deptno);
 
 Step 4: Insert Sample Data
