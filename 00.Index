@@ -224,6 +224,18 @@ DROP CLUSTER emp_dept_cluster INCLUDING TABLES;
 ***********************************************************************************
  
 
+| **Aspect**         | **Clustered Index (via Cluster in Oracle)**                                                        | **Non-Clustered Index (Default in Oracle)**                        |
+| ------------------ | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| **Definition**     | Rows of related tables stored **together** in the same data block based on a cluster key.          | Separate index structure with **ROWIDs** pointing to table rows.   |
+| **Storage**        | Data + index stored **together**.                                                                  | Data stored separately, index contains only **ROWID pointers**.    |
+| **Number Allowed** | Only **one cluster index** per cluster.                                                            | A table can have **multiple non-clustered indexes**.               |
+| **Best For**       | Queries with **frequent joins** on cluster key (e.g., `EMP.DEPTNO = DEPT.DEPTNO`).                 | Queries with **WHERE, ORDER BY, functions, filtering**.            |
+| **Performance**    | Speeds up **joins**, but DML (INSERT/UPDATE/DELETE) can be slower.                                 | Speeds up **search/filtering**; DML overhead is less than cluster. |
+| **Example Syntax** |   CREATE CLUSTER emp_dept_cluster(deptno NUMBER(2));                                               | CREATE INDEX idx_emp_ename 
+                     |   CREATE INDEX idx_emp_dept_cluster                                                                |  ON emp44(ename);
+                     |   ON CLUSTER emp_dept_cluster;                                                                     |
+| **Flexibility**    | Rigid: all tables in cluster must share same key column.                                           | Flexible: can be created on any column(s).                         |
+
 
 
 
