@@ -1,0 +1,74 @@
+SYNONYM 
+
+   🔹 In Oracle, a synonym is also called as Database Object
+   🔹 A synonym is an alias or alternative name for a database object, such as a table, view, sequence, or stored procedure
+   🔹 It allowing users to access these objects without  knowing  the exact object name or schema. 
+   🔹 Synonyms are often used for security
+
+Types of Synonyms
+
+    🔹 Private Synonym
+            -> Created for use by a specific user.
+            -> Accessible only within the user’s schema.
+
+    🔹 Public Synonym
+
+            -> Created for use by all users in the database.
+            -> Requires CREATE PUBLIC SYNONYM system privilege.
+
+syntax:
+
+    CREATE [PUBLIC] SYNONYM synonym_name 
+    FOR [schema.]object_name;
+
+Example
+
+    Private Synonym
+    ----------------
+
+    -- Suppose a table exists in SCOTT schema
+
+        CREATE SYNONYM emp_table FOR scott.emp;
+
+    -- Now you can access employees table directly as:
+
+        SELECT * FROM emp_table;
+
+
+    Public Synonym
+    ---------------
+
+    -- Creating synonym accessible by all users
+       
+       CREATE PUBLIC SYNONYM EMPLOYEE_table FOR scott.EMP;
+
+    -- Any user can now query:
+
+       SELECT * FROM EMPLOYEE_table;
+
+
+    Dropping a Synonym:
+    -------------------
+
+    SYNTAX :
+
+        DROP [PUBLIC] SYNONYM synonym_name;
+
+    EXAMPLE :
+
+        DROP  SYNONYM emp_table ;
+
+        DROP PUBLIC SYNONYM EMPLOYEE_table;
+
+    Check your own synonyms
+    ------------------------
+
+    SELECT synonym_name, table_owner, table_name
+    FROM user_synonyms;
+
+    Check other users’ synonyms (accessible to you)
+    ------------------------------------------------
+
+    SELECT owner, synonym_name, table_owner, table_name
+    FROM all_synonyms
+    WHERE owner = 'USER_NAME';
