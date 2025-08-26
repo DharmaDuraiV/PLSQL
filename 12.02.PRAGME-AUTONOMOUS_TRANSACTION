@@ -1,8 +1,6 @@
 
 Example :
 
-lets create the normal procedure to update the employees salary based on the employee number.
-
 WAQTD EMPNO AND SALARY OF ALL THE EMPLOYEE AND ARRANGE THE SALARY IN ASCENDING ORDER :
 
 SELECT EMPNO , SAL
@@ -17,9 +15,11 @@ ORDER BY SAL
       7876       1100
       7521       1250
 
-Normal procedure:
+Example :
 
 Write a procedure to update the  salary of employees: 100 rupees based on the empno
+
+Normal procedure :
 
       create or replace procedure emp_salary_update( p_empno number)
       is 
