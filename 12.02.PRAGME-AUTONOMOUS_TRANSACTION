@@ -19,6 +19,8 @@ ORDER BY SAL
 
 Normal procedure:
 
+Write a procedure to update the  salary of employees: 100 rupees based on the empno
+
       create or replace procedure emp_salary_update( p_empno number)
       is 
       begin 
