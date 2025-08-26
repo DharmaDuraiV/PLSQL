@@ -29,6 +29,11 @@ Types of Triggers
 🔹 Statement-Level Trigger → Executes once per SQL statement, no matter how many rows.
 
 
+******************************************************************************************************
+
+🔹 Row-Level Trigger
+---------------------
+
 IN STATEMENTS LEVEL TRIGGER, TRIGGER BODY IS EXECUTED ONLY ONCE FOR DML STATEMENTS.
 WHERE AS IN ROW LEVEL TRIGGER ,TRIGGER BODY IS EXECUTED FOR EACH ROW FOR DML STATEMENTS.
 
@@ -313,8 +318,63 @@ dbms_output:
 dbms_output:
 
   Employee: RAJESH, Dept: 10, New Salary: 4000, Bonus: 600
+---------------------------------------------------------------------------------------------
+
+Create a sequence and a trigger such that whenever a new record is inserted into the table Q2, 
+the CID column should be automatically populated with the next value of the sequence.
+
+CREATE SEQUENCE S2
+START WITH 1
+INCREMENT BY 1;
+
+CREATE TABLE Q2
+(
+CID NUMBER,
+CNAME VARCHAR(20)
+);
+
+CREATE OR REPLACE TRIGGER AUTO1
+BEFORE INSERT ON Q2
+FOR EACH ROW
+BEGIN
+ :NEW.CID := S2.NEXTVAL ;
+END ;
+/
+
+---------------------------------------------------------------------------------------------
 
 
+--> WRITE A PL/SQL ROW LEVEL TRIGGER ON DEPT TABLE WHENEVER USER UPDATE THE DATA INTO A DEPT TABLE IT SHOULD MODIFY ON EMP TABLE
+
+CREATE OR REPLACE TRIGGER T2
+AFTER UPDATE ON DEPT
+FOR EACH ROW
+BEGIN
+UPDATE EMP
+SET DEPTNO = :NEW.DEPTNO
+WHERE DEPTNO =:OLD.DEPTNO;
+END ;
+/
+
+BEGIN
+UPDATE DEPT
+SET DEPTNO =30
+WHERE DEPTNO=60;
+END ;
+/
+
+---------------------------------------------------------------------------------------------
+
+--> WRITE A PL/SQL  TRIGGER USING EMP,DEPT TABLE IMPLEMENT ON DELETE WITH OUT USING CASCADE ON DELETE .
+
+CREATE OR REPLACE TRIGGER T4
+AFTER DELETE ON DEPT
+FOR EACH ROW
+BEGIN
+DELETE FROM EMP
+WHERE DEPTNO= :OLD.DEPTNO;
+END ;
+/
 
 ---------------------------------------------------------------------------------------------
 🔹 Can you use COMMIT directly inside a normal row-level trigger?
@@ -326,6 +386,34 @@ dbms_output:
 🔹 How can you safely log data from a trigger that requires a commit?
 
     -> ✅ Use an autonomous transaction. It allows the trigger to commit independently of the main transaction.
+
+EXAMPLE:
+
+Write a trigger named E_TRANS on the EMP table such that:
+The trigger should fire after an UPDATE on the EMP table.
+Whenever the salary of an employee is updated, the old salary and new salary should be recorded into the EMP_TRANS table along with the employee number and name.
+Use PRAGMA AUTONOMOUS_TRANSACTION so that the insert into EMP_TRANS is committed independently of the main transaction.
+
+
+    CREATE TABLE EMP_TRANS
+    (
+      EMPNO NUMBER ,
+      NAME VARCHAR(20),
+      OLD_SAL NUMBER,
+      NEW_SAL NUMBER
+    );
+
+    CREATE OR REPLACE TRIGGER E_TRANS
+    AFTER UPDATE ON EMP
+    FOR EACH ROW
+    DECLARE
+      PRAGMA AUTONOMOUS_TRANSACTION ;
+    BEGIN
+      INSERT INTO EMP_TRANS(EMPNO,NAME,OLD_SAL,NEW_SAL)
+      VALUES (:OLD.EMPNO,:OLD.ENAME,:OLD.SAL,:NEW.SAL);
+        COMMIT ;
+    END ;
+    /
 ---------------------------------------------------------------------------------------------
 
 --> WRITE A PL/SQL ROW LEVEL TRIGGER ON EMPLOYEE TABLE WHENEVER USER INSERTING THE DATA INTO A EMP TABLE SAL SHOULD BE ABOVE MORE THAN 5000.
@@ -358,76 +446,8 @@ ORA-06512: AT LINE 2
 
 
 
---> WRITE A PL/SQL ROW LEVEL TRIGGER ON DEPT TABLE WHENEVER USER UPDATE THE DATA INTO A DEPT TABLE IT SHOULD MODIFY ON EMP TABLE
-
-CREATE OR REPLACE TRIGGER T2
-AFTER UPDATE ON DEPT
-FOR EACH ROW
-BEGIN
-UPDATE EMP
-SET DEPTNO = :NEW.DEPTNO
-WHERE DEPTNO =:OLD.DEPTNO;
-END ;
-/
-
-BEGIN
-UPDATE DEPT
-SET DEPTNO =30
-WHERE DEPTNO=60;
-END ;
-/
-
---> WRITE A PL/SQL  TRIGGER USING EMP,DEPT TABLE IMPLEMENT ON DELETE WITH OUT USING CASCADE ON DELETE .
-
-CREATE OR REPLACE TRIGGER T4
-AFTER DELETE ON DEPT
-FOR EACH ROW
-BEGIN
-DELETE FROM EMP
-WHERE DEPTNO= :OLD.DEPTNO;
-END ;
-/
 
 
-EXAMPLE:1
-
-CREATE SEQUENCE S2
-START WITH 1
-INCREMENT BY 1;
-
-CREATE TABLE Q2
-(
-CID NUMBER,
-CNAME VARCHAR(20)
-);
-
-CREATE OR REPLACE TRIGGER AUTO1
-BEFORE INSERT ON Q2
-FOR EACH ROW
-BEGIN
-SELECT S2.NEXTVAL INTO :NEW.CID FROM DUAL;
-END ;
-/
+---------------------------------------------------------------------------------------------
 
 
-EXAMPLE:2
-
-CREATE TABLE EMP_TRANS
-(
-EMPNO NUMBER ,
-NAME VARCHAR(20),
-OLD_SAL NUMBER,
-NEW_SAL NUMBER
-);
-
-CREATE OR REPLACE TRIGGER E_TRANS
-AFTER UPDATE ON EMP
-FOR EACH ROW
-DECLARE
-PRAGMA AUTONOMOUS_TRANSACTION ;
-BEGIN
-INSERT INTO EMP_TRANS(EMPNO,NAME,OLD_SAL,NEW_SAL)
-VALUES (:OLD.EMPNO,:OLD.ENAME,:OLD.SAL,:NEW.SAL);
-COMMIT ;
-END ;
-/
