@@ -1,0 +1,43 @@
+🔹 What is a Collection in PL/SQL (Oracle)?
+
+In PL/SQL, a collection is a single-dimensional group of elements (like an array) that can hold multiple values of the same data type.
+
+It acts as a container to store and manipulate multiple values together.
+
+Oracle PL/SQL provides 3 types of collections:
+
+      -->1) Associative Arrays (index-by tables)
+      -->2) Nested Tables
+      -->1) VARRAYs (Variable-size arrays)
+-------------------------------------------------------
+  🔹 Why Collection?
+Normally, PL/SQL variables store only one value at a time. But in real-world applications, we often need to handle multiple values (like a list of employee IDs, student marks, product prices, etc.).
+
+Collections help because:
+They allow us to store multiple values in one variable.
+Improve performance when moving bulk data between SQL and PL/SQL (using BULK COLLECT and FORALL).
+Provide flexibility to handle in-memory data like arrays or lists.
+
+  ----------------------------------------------------
+  Where do we use Collections?
+
+Collections are commonly used in:
+
+Bulk Data Processing
+    Fetching multiple rows from a query into a collection (using BULK COLLECT).
+
+Example: Collecting all employee salaries at once instead of looping row by row.
+
+Batch Operations
+    Updating/deleting/inserting many rows efficiently (using FORALL with collections).
+
+Temporary Data Storage
+    Holding intermediate results in memory.
+
+Example: Storing marks of students before calculating averages.
+
+Procedures/Functions Parameters
+    Passing multiple values (like a list of IDs) into a procedure.
+
+Complex Business Logic
+    Handling lookups, transformations, and in-memory computations.
