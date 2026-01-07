@@ -1,0 +1,220 @@
+Correct ✅
+For **multiple-row SELECT**, you must use **REF CURSOR**, **not** `EXECUTE IMMEDIATE ... INTO`.
+
+Below are **clear, complete notes** explaining **why**, **how**, and **real-time usage**.
+
+---
+
+# 📘 Use REF CURSOR, NOT `EXECUTE IMMEDIATE INTO`
+
+---
+
+## ❌ Why `EXECUTE IMMEDIATE INTO` Fails
+
+`EXECUTE IMMEDIATE ... INTO` works **ONLY** when:
+
+* One row
+* One column
+
+### ❌ Wrong Example (Multiple Rows)
+
+```sql
+DECLARE
+  v_name employees.emp_name%TYPE;
+BEGIN
+  EXECUTE IMMEDIATE
+    'SELECT emp_name FROM employees'
+  INTO v_name;
+END;
+/
+```
+
+🔴 Error:
+
+```
+ORA-01422: exact fetch returns more than requested number of rows
+```
+
+---
+
+## ✅ Correct Solution → Use REF CURSOR
+
+A **REF CURSOR** is a pointer to a result set that can handle:
+
+* Multiple rows
+* Dynamic SQL
+* Runtime table/column names
+
+---
+
+## 1️⃣ What is a REF CURSOR?
+
+A **REF CURSOR** allows you to:
+
+* Open a query dynamically
+* Fetch rows one by one
+* Handle large result sets
+
+---
+
+## 2️⃣ REF CURSOR Types
+
+### Strong REF CURSOR
+
+```sql
+TYPE emp_cur IS REF CURSOR RETURN employees%ROWTYPE;
+```
+
+### Weak REF CURSOR (MOST COMMON ⭐)
+
+```sql
+TYPE emp_cur IS REF CURSOR;
+```
+
+---
+
+## 3️⃣ Basic Syntax (Dynamic SELECT)
+
+```sql
+OPEN ref_cursor FOR dynamic_sql USING bind_values;
+```
+
+---
+
+## 4️⃣ Correct Way: Dynamic SELECT Using REF CURSOR
+
+```sql
+DECLARE
+  TYPE emp_cur IS REF CURSOR;
+  c_emp emp_cur;
+
+  v_id   employees.emp_id%TYPE;
+  v_name employees.emp_name%TYPE;
+BEGIN
+  OPEN c_emp FOR
+    'SELECT emp_id, emp_name FROM employees WHERE dept_id = :d'
+  USING 10;
+
+  LOOP
+    FETCH c_emp INTO v_id, v_name;
+    EXIT WHEN c_emp%NOTFOUND;
+    DBMS_OUTPUT.PUT_LINE(v_id || ' - ' || v_name);
+  END LOOP;
+
+  CLOSE c_emp;
+END;
+/
+```
+
+✅ Handles **multiple rows safely**
+
+---
+
+## 5️⃣ Dynamic Table Name with REF CURSOR (Real-Time Case)
+
+```sql
+DECLARE
+  TYPE ref_cur IS REF CURSOR;
+  c_data ref_cur;
+
+  v_table VARCHAR2(30) := 'employees';
+  v_count NUMBER;
+BEGIN
+  OPEN c_data FOR
+    'SELECT COUNT(*) FROM ' || v_table;
+
+  FETCH c_data INTO v_count;
+  CLOSE c_data;
+
+  DBMS_OUTPUT.PUT_LINE('Count = ' || v_count);
+END;
+/
+```
+
+📌 Table names **must be concatenated**, not binded.
+
+---
+
+## 6️⃣ Returning REF CURSOR from Procedure (Very Important ⭐)
+
+```sql
+CREATE OR REPLACE PROCEDURE get_employees (
+  p_dept_id IN NUMBER,
+  p_cursor  OUT SYS_REFCURSOR
+) AS
+BEGIN
+  OPEN p_cursor FOR
+    SELECT emp_id, emp_name
+    FROM employees
+    WHERE dept_id = p_dept_id;
+END;
+/
+```
+
+---
+
+## 7️⃣ Calling Procedure with REF CURSOR
+
+```sql
+DECLARE
+  c SYS_REFCURSOR;
+  v_id NUMBER;
+  v_name VARCHAR2(50);
+BEGIN
+  get_employees(10, c);
+
+  LOOP
+    FETCH c INTO v_id, v_name;
+    EXIT WHEN c%NOTFOUND;
+    DBMS_OUTPUT.PUT_LINE(v_id || ' ' || v_name);
+  END LOOP;
+
+  CLOSE c;
+END;
+/
+```
+
+---
+
+## 8️⃣ EXECUTE IMMEDIATE vs REF CURSOR
+
+| Feature         | EXECUTE IMMEDIATE INTO | REF CURSOR             |
+| --------------- | ---------------------- | ---------------------- |
+| Rows returned   | ❌ One row only         | ✅ Multiple             |
+| Dynamic SELECT  | ⚠️ Limited             | ✅ Fully                |
+| Performance     | Good                   | Better for result sets |
+| Real-time usage | Rare                   | ⭐ Very common          |
+
+---
+
+## 9️⃣ Interview Golden Rule ⭐
+
+> ❗ **Never use `EXECUTE IMMEDIATE INTO` for multiple rows. Always use REF CURSOR.**
+
+---
+
+## 🔟 One-Line Interview Answer
+
+> `EXECUTE IMMEDIATE INTO` is for single-row queries, whereas **REF CURSOR** is used to fetch **multiple rows from dynamic SQL**.
+
+---
+
+## 1️⃣1️⃣ Real-Time Backend Example
+
+✔ Admin reports
+✔ Export data (CSV / Excel)
+✔ Pagination queries
+✔ Dynamic filtering
+✔ API result streaming
+
+---
+
+If you want next, I can give you:
+
+* 🔥 **REF CURSOR vs SYS_REFCURSOR**
+* 🔥 **REF CURSOR in Packages**
+* 🔥 **Pagination using REF CURSOR**
+* 🔥 **Banking / OTP / Audit real-time examples**
+* 🔥 **Complete PDF notes**
+
+Just tell me 👍
