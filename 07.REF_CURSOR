@@ -1,0 +1,240 @@
+REF CURSOR (Reference Cursor)
+------------------------------
+
+What is a REF CURSOR?
+
+  A REF CURSOR is a pointer (reference) to a query result.
+
+👉 Normal cursor = fixed query
+👉 REF CURSOR = query decided at runtime
+
+Types of REF CURSOR in PL/SQL
+  🔹 Weak REF CURSOR
+  🔹 Strong REF CURSOR
+
+
+
+1️⃣ Weak REF CURSOR
+🔹 Definition
+
+A Weak REF CURSOR has NO predefined structure.
+
+Syntax
+    TYPE ref_cur IS REF CURSOR;
+
+or directly use:
+
+    SYS_REFCURSOR
+
+REF CURSOR, the syntax is:
+
+    OPEN <ref_cursor_variable> FOR <SELECT statement>;
+
+✅ Example
+
+DECLARE
+  c SYS_REFCURSOR;
+  v_name emp.ename%TYPE;
+  v_sal  emp.sal%TYPE;
+BEGIN
+  OPEN c FOR
+    SELECT ename, sal FROM emp;
+
+  FETCH c INTO v_name, v_sal;
+  DBMS_OUTPUT.PUT_LINE(v_name || ' ' || v_sal);
+
+  CLOSE c;
+END;
+/
+
+
+
+Why FOR is mandatory here
+-------------------------
+  A REF CURSOR is empty when declared.
+
+TYPE emp_cur IS REF CURSOR;
+c_emp emp_cur;   -- only a pointer (no query yet)
+
+
+So Oracle needs to know:
+Which query should this cursor point to?
+That is done using:
+
+OPEN c_emp FOR SELECT ...
+
+
+
+Example :  Simple REF CURSOR
+-------------------------------
+DECLARE
+  v_cur SYS_REFCURSOR;
+  v_name emp.ename%TYPE;
+BEGIN
+  OPEN v_cur FOR
+    SELECT ename FROM emp WHERE deptno = 10;
+
+  FETCH v_cur INTO v_name;
+  DBMS_OUTPUT.PUT_LINE(v_name);
+
+  CLOSE v_cur;
+END;
+/
+
+
+🔹 Normal cursor (static)
+CURSOR c_emp IS SELECT * FROM emp;
+OPEN c_emp;
+
+👉 Query is fixed at declaration time
+
+🔹 REF CURSOR (dynamic)
+c_emp emp_cur;
+OPEN c_emp FOR SELECT * FROM emp;
+
+👉 Query is attached at runtime
+
+That attachment is done using FOR
+
+Why REF CURSOR is called Dynamic?
+
+A REF CURSOR is called dynamic because the SQL query is NOT fixed at compile time.
+Instead, it is decided and attached at runtime.
+
+🔴 Static Cursor (NOT dynamic)
+CURSOR c_emp IS
+  SELECT ename, sal FROM emp;
+
+Characteristics
+Query is hard-coded
+Structure is fixed
+Cannot change columns or tables
+Decided at compile time
+
+👉 This is why it’s called static cursor
+
+🟢 REF CURSOR (Dynamic)
+
+OPEN c_emp FOR
+  SELECT ename, sal FROM emp;
+
+Characteristics
+
+Query is supplied at runtime
+Can change:
+tables
+columns
+WHERE conditions
+Structure is not fixed
+
+👉 That flexibility makes it dynamic
+----------------------------------------------------------------------------
+
+2️⃣ Strong REF CURSOR
+🔹 Definition
+      A Strong REF CURSOR has a fixed return structure.
+
+Syntax
+  TYPE emp_cur IS REF CURSOR RETURN DATATYPE;
+
+📌 Structure is checked at compile time
+
+🔑 CORE RULE (MOST IMPORTANT)
+    🔥 A STRONG REF CURSOR (RETURN) can return ONLY a RECORD type — NOT a scalar datatype
+❌ NOT allowed
+
+VARCHAR2
+NUMBER
+EMP.ENAME%TYPE
+
+✅ Allowed
+%ROWTYPE
+User-defined record type
+
+✅ Example
+
+DECLARE
+  TYPE emp_cur IS REF CURSOR RETURN emp%ROWTYPE;
+  c_emp emp_cur;
+
+  v_emp emp%ROWTYPE;
+BEGIN
+  OPEN c_emp FOR
+    SELECT * FROM emp;
+
+  FETCH c_emp INTO v_emp;
+  DBMS_OUTPUT.PUT_LINE(v_emp.ename || ' ' || v_emp.sal);
+
+  CLOSE c_emp;
+END;
+/
+
+
+❌ Compile-Time Error Example
+
+OPEN c_emp FOR
+  SELECT ename, sal FROM emp;
+
+❌ Error because structure does not match emp%ROWTYPE.
+1️⃣ RECORD + REF CURSOR (RETURN RECORD)
+Example: RECORD + REF CURSOR
+
+DECLARE
+  -- Step 1: Define RECORD
+  TYPE emp_rec IS RECORD (
+    empno emp.empno%TYPE,
+    ename emp.ename%TYPE,
+    sal   emp.sal%TYPE
+  );
+
+  -- Step 2: Define REF CURSOR returning RECORD
+  TYPE emp_cur_type IS REF CURSOR RETURN emp_rec;
+
+  v_cur emp_cur_type;
+  v_emp emp_rec;
+BEGIN
+  OPEN v_cur FOR
+    SELECT empno, ename, sal FROM emp;
+
+  LOOP
+    FETCH v_cur INTO v_emp;
+    EXIT WHEN v_cur%NOTFOUND;
+
+    DBMS_OUTPUT.PUT_LINE(v_emp.empno || ' ' || v_emp.ename || ' ' || v_emp.sal);
+  END LOOP;
+
+  CLOSE v_cur;
+END;
+/
+
+
+2️⃣ %ROWTYPE + REF CURSOR (RETURN %ROWTYPE)
+Concept
+%ROWTYPE creates a record with all columns
+REF CURSOR returns entire table rows
+RETURN emp%ROWTYPE ensures strong typing
+
+Example: %ROWTYPE + REF CURSOR
+
+DECLARE
+  -- REF CURSOR returning full EMP row
+  TYPE emp_cur_type IS REF CURSOR RETURN emp%ROWTYPE;
+
+  v_cur emp_cur_type;
+  v_emp emp%ROWTYPE;
+BEGIN
+  OPEN v_cur FOR
+    SELECT * FROM emp;
+
+  LOOP
+    FETCH v_cur INTO v_emp;
+    EXIT WHEN v_cur%NOTFOUND;
+
+    DBMS_OUTPUT.PUT_LINE(v_emp.empno || ' ' || v_emp.ename || ' ' || v_emp.sal);
+  END LOOP;
+
+  CLOSE v_cur;
+END;
+/
+
+
