@@ -14,7 +14,7 @@ Types of RECORDS in PL/SQL
 2️⃣ %ROWTYPE RECORD (Anchored record)
 
 
-1️⃣ User-Defined RECORD (Custom Structure)
+User-Defined RECORD (Custom Structure)
 Syntax
 TYPE record_type_name IS RECORD (
   field1 datatype,
@@ -25,7 +25,7 @@ TYPE record_type_name IS RECORD (
 record_variable record_type_name;
 
 ------------------------------------------------
-RECORD with Basic Datatypes
+1️⃣ RECORD with Basic Datatypes
 
 Example 1: User-Defined RECORD
 -------------------------------
@@ -52,36 +52,56 @@ BEGIN
 END;
 /
 
+------------------------------------------------
+2️⃣ Using %TYPE in Record Fields (Best Practice)
 
-2️⃣ RECORD with Anchored Datatypes (%TYPE)
-
-Example 2: %TYPE Record
--------------------------------
+This keeps your code table-dependent safe.
 
 DECLARE
-  TYPE emp_rec IS RECORD (
+  TYPE emp_rec_type IS RECORD (
+    emp_id   emp.empno%TYPE,
+    emp_name emp.ename%TYPE,
+    salary   emp.sal%TYPE
+  );
+
+  v_emp emp_rec_type;
+BEGIN
+  v_emp.emp_id := 7369;
+  v_emp.emp_name := 'SMITH';
+  v_emp.salary := 800;
+END;
+/
+
+------------------------------------------------
+
+3️⃣  RECORD with Anchored Datatypes (%TYPE)
+
+DECLARE
+  TYPE emp_rec_type IS RECORD (
     empno emp.empno%TYPE,
     ename emp.ename%TYPE,
     sal   emp.sal%TYPE
   );
 
-  v_emp emp_rec;
+  v_emp emp_rec_type;
 BEGIN
   SELECT empno, ename, sal
   INTO v_emp
   FROM emp
   WHERE empno = 7369;
 
-  DBMS_OUTPUT.PUT_LINE(v_emp.ename || ' earns ' || v_emp.sal);
+  DBMS_OUTPUT.PUT_LINE(v_emp.ename || ' - ' || v_emp.sal);
 END;
 /
 
-3️⃣ %ROWTYPE RECORD (Table-Based)
+ ⚠️  Hint :  Order of columns must match record fields
+------------------------------------------------
+
+4️⃣ %ROWTYPE RECORD (Table-Based)
 
 Syntax
 record_variable table_name%ROWTYPE;
 
-Example 3: %ROWTYPE Record
 -----------------------------
 DECLARE
   v_emp emp%ROWTYPE;
