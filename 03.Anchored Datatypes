@@ -10,6 +10,7 @@ What are Anchored Datatypes?
       PL/SQL supports two types of variable attributes:
      🔸  %TYPE
      🔸 %ROWTYPE
+     🔸 RECORDS
 
 Why Anchored Datatypes?
 ------------------------
