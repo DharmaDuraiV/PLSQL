@@ -1,7 +1,6 @@
 🔹 What is a Collection in PL/SQL (Oracle)?
 
 In PL/SQL, a collection is a single-dimensional group of elements (like an array) that can hold multiple values of the same data type.
-
 It acts as a container to store and manipulate multiple values together.
 
 Oracle PL/SQL provides 3 types of collections:
