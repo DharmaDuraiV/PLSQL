@@ -1,5 +1,8 @@
-VARIABLE ATTRIBUTES 
-----------------------
+Anchored Datatypes / VARIABLE ATTRIBUTES 
+-----------------------------------------
+
+What are Anchored Datatypes?
+ 🔸 Anchored datatypes allow a variable to automatically take its datatype from a database column or another variable.
  🔸 Variable attributes are used instead of explicitly specifying a data type when declaring variables or parameters
  🔸 They help in automatically matching the datatype of a variable with a table column
  🔸 This makes the code more flexible and maintainable
@@ -7,6 +10,13 @@ VARIABLE ATTRIBUTES
       PL/SQL supports two types of variable attributes:
      🔸  %TYPE
      🔸 %ROWTYPE
+
+Why Anchored Datatypes?
+------------------------
+  🔸 They solve real-time problems like:
+  🔸 Column datatype changes
+  🔸 Length changes (VARCHAR2 size)
+  🔸 Precision/scale changes
 
 1️⃣ %TYPE Attribute
 
@@ -84,3 +94,13 @@ Assignments :
 7. Write a PL/SQL block that, given an EMPNO, declares %TYPE variables to retrieve and display the employee’s name and commission only if their commission equals 1400.
 8. Create a PL/SQL anonymous block that prompts for an EMPNO, retrieves the monthly salary into a %TYPE variable, calculates the annual salary , and displays the result .
 9. Construct a PL/SQL block that, for a provided EMPNO, declares %TYPE variables to fetch and print the employee’s name and manager ID (MGR).
+
+
+| Feature       |  %TYPE                   |  %ROWTYPE        |
+| ------------- | ------------------------ | ---------------- |
+| Anchors to    | Single column / variable | Entire row       |
+| Memory        | Low                      | Higher           |
+| Flexibility   | High                     | Less             |
+| Used when     | Few columns              | All columns      |
+| Real-time use | Very common              | Cursor-based ops |
+
