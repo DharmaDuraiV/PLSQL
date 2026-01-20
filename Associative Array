@@ -1,0 +1,410 @@
+🔹 What is an Associative Array?
+An associative array is a key-value collection stored only in PL/SQL memory.
+
+Index can be:
+
+NUMBER
+VARCHAR2
+Size is dynamic
+Fast access
+Cannot be stored in database tables
+
+🔹 Why Learn This First?
+
+✔ Easiest
+✔ No database objects required
+✔ Best for temporary data processing
+
+🔹 Syntax
+TYPE type_name IS TABLE OF datatype
+INDEX BY index_type;
+
+collection_name type_name;
+
+--------------------------------------------------------
+
+🔹 Simple Example (BEGINNER)
+
+
+DECLARE
+  TYPE emp_name_tab IS TABLE OF VARCHAR2(50)
+  INDEX BY PLS_INTEGER;
+
+  emp_names emp_name_tab;
+BEGIN
+  emp_names(1) := 'Ravi';
+  emp_names(2) := 'Kumar';
+
+  DBMS_OUTPUT.PUT_LINE(emp_names(1));
+  DBMS_OUTPUT.PUT_LINE(emp_names(2));
+END;
+/
+
+1️⃣ DATATYPE (What can be stored?)
+
+You can store almost any PL/SQL datatype as the element type.
+
+✅ Allowed DATATYPES
+🔸 Scalar Types
+
+NUMBER
+VARCHAR2
+CHAR
+DATE
+BOOLEAN
+PLS_INTEGER
+BINARY_INTEGER
+
+TYPE num_tab IS TABLE OF NUMBER INDEX BY PLS_INTEGER;
+
+🔸 %TYPE
+TYPE name_tab IS TABLE OF emp.ename%TYPE INDEX BY PLS_INTEGER;
+
+🔸 RECORD Type
+TYPE emp_rec IS RECORD (
+  empno emp.empno%TYPE,
+  ename emp.ename%TYPE
+);
+
+TYPE emp_tab IS TABLE OF emp_rec INDEX BY PLS_INTEGER;
+
+🔸 %ROWTYPE
+TYPE emp_tab IS TABLE OF emp%ROWTYPE INDEX BY PLS_INTEGER;
+
+🔸 Object Type
+TYPE emp_obj IS OBJECT (
+  empno NUMBER,
+  ename VARCHAR2(30)
+);
+
+TYPE obj_tab IS TABLE OF emp_obj INDEX BY PLS_INTEGER;
+
+🔸 Nested Collection Types
+TYPE num_tab IS TABLE OF NUMBER INDEX BY PLS_INTEGER;
+TYPE nested_tab IS TABLE OF num_tab INDEX BY PLS_INTEGER;
+
+❌ NOT Allowed as DATATYPE
+
+LONG
+LONG RAW
+ROWID (directly, avoid)
+CLOB / BLOB (restricted usage)
+XMLTYPE (not recommended)
+
+2️⃣ INDEX_TYPE (What can be used as KEY?)
+
+This defines the KEY of the associative array.
+
+✅ Allowed INDEX_TYPES
+
+| Index Type       | Allowed? | Notes              |
+| ---------------- | -------- | ------------------ |
+| `PLS_INTEGER`    | ✅ BEST   | Fastest, most used |
+| `BINARY_INTEGER` | ✅        | Older              |
+| `INTEGER`        | ❌        | Not allowed        |
+| `VARCHAR2`       | ✅        | String-based index |
+| `STRING`         | ❌        | Not allowed        |
+| `NUMBER`         | ❌        | Not allowed        |
+
+
+
+✔ Numeric Index Example
+TYPE sal_tab IS TABLE OF NUMBER
+INDEX BY PLS_INTEGER;
+
+v_sal sal_tab;
+BEGIN
+  v_sal(1) := 3000;
+  v_sal(2) := 4000;
+END;
+
+✔ String Index Example
+TYPE emp_name_tab IS TABLE OF emp.empno%TYPE
+INDEX BY VARCHAR2(30);
+
+v_emp emp_name_tab;
+BEGIN
+  v_emp('SMITH') := 7369;
+  v_emp('ALLEN') := 7499;
+END;
+
+3️⃣ MOST IMPORTANT COMBINATIONS (Interview Focus)
+🔥 Best Practice
+TYPE t_tab IS TABLE OF emp%ROWTYPE
+INDEX BY PLS_INTEGER;
+
+🔥 Record + Index
+TYPE emp_tab IS TABLE OF emp_rec
+INDEX BY PLS_INTEGER;
+
+🔥 String Key Lookup
+TYPE dept_tab IS TABLE OF dept.deptno%TYPE
+INDEX BY VARCHAR2(20);
+
+🔹 Key Methods
+
+| Method      | Meaning            |
+| ----------- | ------------------ |
+| `COUNT`     | Number of elements |
+| `FIRST`     | First index        |
+| `LAST`      | Last index         |
+| `NEXT(i)`   | Next index         |
+| `PRIOR(i)`  | Previous index     |
+| `EXISTS(i)` | Check index exists |
+| `DELETE`    | Remove elements    |
+
+
+🔹 1️⃣ COUNT – Number of Elements
+👉 Meaning
+
+Returns how many elements exist in the collection.
+
+🧪 Example
+DECLARE
+  TYPE num_tab IS TABLE OF NUMBER INDEX BY PLS_INTEGER;
+  nums num_tab;
+BEGIN
+  nums(1) := 10;
+  nums(2) := 20;
+  nums(5) := 50;
+
+  DBMS_OUTPUT.PUT_LINE('Total Elements: ' || nums.COUNT);
+END;
+/
+
+✅ Output
+Total Elements: 3
+
+
+📌 Note: Index gaps don’t matter.
+
+
+🔹 2️⃣ FIRST – First Index
+👉 Meaning
+
+Returns the lowest index VALUE in the collection.
+
+🧪 Example
+DECLARE
+  TYPE emp_tab IS TABLE OF VARCHAR2(50) INDEX BY PLS_INTEGER;
+  emp emp_tab;
+BEGIN
+  emp(10) := 'Ravi';
+  emp(20) := 'Kumar';
+
+  DBMS_OUTPUT.PUT_LINE('First Index: ' || emp.FIRST);
+END;
+/
+
+✅ Output
+First Index: 10
+
+
+🔹 3️⃣ LAST – Last Index
+👉 Meaning
+
+Returns the highest index in the collection.
+
+🧪 Example
+DECLARE
+  TYPE emp_tab IS TABLE OF VARCHAR2(50) INDEX BY PLS_INTEGER;
+  emp emp_tab;
+BEGIN
+  emp(100) := 'A';
+  emp(200) := 'B';
+
+  DBMS_OUTPUT.PUT_LINE('Last Index: ' || emp.LAST);
+END;
+/
+
+✅ Output
+Last Index: 200
+
+
+🔹 4️⃣ NEXT(i) – Next Index
+👉 Meaning
+
+Returns the next valid index after i.
+
+🧪 Example
+DECLARE
+  TYPE num_tab IS TABLE OF NUMBER INDEX BY PLS_INTEGER;
+  nums num_tab;
+  i PLS_INTEGER;
+BEGIN
+  nums(5)  := 100;
+  nums(10) := 200;
+  nums(50) := 300;
+
+  i := nums.FIRST;
+  DBMS_OUTPUT.PUT_LINE('Current: ' || i);
+  DBMS_OUTPUT.PUT_LINE('Next: ' || nums.NEXT(i));
+END;
+/
+
+✅ Output
+Current: 5
+Next: 10
+
+
+📌 If no next index → returns NULL.
+
+🔹 5️⃣ PRIOR(i) – Previous Index
+👉 Meaning
+
+Returns the previous valid index before i.
+
+🧪 Example
+DECLARE
+  TYPE num_tab IS TABLE OF NUMBER INDEX BY PLS_INTEGER;
+  nums num_tab;
+BEGIN
+  nums(1)  := 10;
+  nums(5)  := 50;
+  nums(20) := 200;
+
+  DBMS_OUTPUT.PUT_LINE('Previous of 20: ' || nums.PRIOR(20));
+END;
+/
+
+✅ Output
+Previous of 20: 5
+
+🔹 6️⃣ EXISTS(i) – Check Index Exists
+👉 Meaning
+
+Returns TRUE if index exists, else FALSE.
+
+🧪 Example
+DECLARE
+  TYPE emp_tab IS TABLE OF VARCHAR2(30) INDEX BY PLS_INTEGER;
+  emp emp_tab;
+BEGIN
+  emp(1) := 'Dharma';
+
+  IF emp.EXISTS(1) THEN
+    DBMS_OUTPUT.PUT_LINE('Index 1 exists');
+  END IF;
+
+  IF NOT emp.EXISTS(5) THEN
+    DBMS_OUTPUT.PUT_LINE('Index 5 does NOT exist');
+  END IF;
+END;
+/
+
+✅ Output
+Index 1 exists
+Index 5 does NOT exist
+
+
+📌 Very useful to avoid NO_DATA_FOUND errors.
+
+
+🔹 7️⃣ DELETE – Remove Elements
+👉 Meaning
+
+Deletes elements from collection.
+
+🧪 Example 1: Delete ONE element
+DECLARE
+  TYPE num_tab IS TABLE OF NUMBER INDEX BY PLS_INTEGER;
+  nums num_tab;
+BEGIN
+  nums(1) := 10;
+  nums(2) := 20;
+  nums(3) := 30;
+  nums(4) := 40;
+  nums(5) := 50;
+
+  nums.DELETE(1);
+
+  DBMS_OUTPUT.PUT_LINE('Count after delete: ' || nums.COUNT);
+END;
+/
+
+✅ Output
+Count after delete: 4
+
+🧪 Example 2: Delete RANGE
+
+DECLARE
+  TYPE num_tab IS TABLE OF NUMBER INDEX BY PLS_INTEGER;
+  nums num_tab;
+BEGIN
+  nums(1) := 10;
+  nums(2) := 20;
+  nums(3) := 30;
+  nums(4) := 40;
+  nums(5) := 50;
+
+  nums.DELETE(1, 3);
+
+  DBMS_OUTPUT.PUT_LINE('Count after delete: ' || nums.COUNT);
+END;
+/
+
+Count after delete: 2
+
+🧪 Example 3: Delete ALL
+
+
+DECLARE
+  TYPE num_tab IS TABLE OF NUMBER INDEX BY PLS_INTEGER;
+  nums num_tab;
+BEGIN
+  nums(1) := 10;
+  nums(2) := 20;
+  nums(3) := 30;
+  nums(4) := 40;
+  nums(5) := 50;
+
+  nums.DELETE;
+
+  DBMS_OUTPUT.PUT_LINE('Count after delete: ' || nums.COUNT);
+END;
+/
+
+Count after delete: 0
+
+-----------------------------------------------------------------------------------
+
+Real Loop Using ALL METHODS
+---------------------------
+DECLARE
+  TYPE num_tab IS TABLE OF NUMBER INDEX BY PLS_INTEGER;
+  nums num_tab;
+  i PLS_INTEGER;
+BEGIN
+  nums(2) := 20;
+  nums(5) := 50;
+  nums(10) := 100;
+
+  i := nums.FIRST;
+  WHILE i IS NOT NULL LOOP
+    DBMS_OUTPUT.PUT_LINE(nums(i));
+    i := nums.NEXT(i);
+  END LOOP;
+END;
+/
+
+DECLARE
+  TYPE num_tab IS TABLE OF NUMBER INDEX BY PLS_INTEGER;
+  nums num_tab;
+  i PLS_INTEGER;
+  L PLS_INTEGER;
+BEGIN
+  nums(2) := 20;
+  nums(5) := 50;
+  nums(10) := 100;
+
+  i := nums.FIRST;
+  L := nums.LAST;
+
+  FOR val IN i..L LOOP
+    IF nums.EXISTS(val) THEN
+      DBMS_OUTPUT.PUT_LINE(nums(val));
+    END IF;
+  END LOOP;
+END;
+/
+
