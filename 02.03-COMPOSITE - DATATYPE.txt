@@ -1,0 +1,149 @@
+Composite Datatypes (Multiple Values)
+
+    Composite datatypes store more than one value.
+
+Composite Datatypes
+│
+├── 1) RECORD
+└── 2) COLLECTIONS
+      ├── a) Associative Array
+      ├── b) Nested Table
+      └── c) VARRAY
+
+
+What is a RECORD?
+   🔸A RECORD is a composite datatype in PL/SQL that allows you to group different fields (columns/variables) into a single unit, similar to a row in a table.
+
+Why Use RECORD?
+
+  🔸 Combine related data (empno, ename, sal) into one variable
+  🔸 Cleaner and readable code
+  🔸 Pass multiple values together
+  🔸 Useful when working with cursors & queries
+
+Types of RECORDS in PL/SQL
+
+1️⃣ User-defined RECORD
+2️⃣ %ROWTYPE RECORD (Anchored record)
+
+
+User-Defined RECORD (Custom Structure)
+Syntax
+TYPE record_type_name IS RECORD (
+  field1 datatype,
+  field2 datatype,
+  field3 datatype
+);
+
+record_variable record_type_name;
+
+------------------------------------------------
+1️⃣ RECORD with Basic Datatypes
+
+Example 1: User-Defined RECORD
+-------------------------------
+DECLARE
+  TYPE student_rec IS RECORD (
+    roll_no   NUMBER,
+    name      VARCHAR2(20),
+    marks     NUMBER(5,2),
+    is_pass   BOOLEAN
+  );
+
+  v_student student_rec;
+BEGIN
+  v_student.roll_no := 1;
+  v_student.name    := 'Ravi';
+  v_student.marks   := 78.50;
+  v_student.is_pass := TRUE;
+
+  DBMS_OUTPUT.PUT_LINE(
+    v_student.roll_no || ' ' ||
+    v_student.name || ' ' ||
+    v_student.marks
+  );
+END;
+/
+
+------------------------------------------------
+2️⃣ Using %TYPE in Record Fields (Best Practice)
+
+This keeps your code table-dependent safe.
+
+DECLARE
+  TYPE emp_rec_type IS RECORD (
+    emp_id   emp.empno%TYPE,
+    emp_name emp.ename%TYPE,
+    salary   emp.sal%TYPE
+  );
+
+  v_emp emp_rec_type;
+BEGIN
+  v_emp.emp_id := 7369;
+  v_emp.emp_name := 'SMITH';
+  v_emp.salary := 800;
+END;
+/
+
+------------------------------------------------
+
+3️⃣  RECORD with Anchored Datatypes (%TYPE)
+
+DECLARE
+  TYPE emp_rec_type IS RECORD (
+    empno emp.empno%TYPE,
+    ename emp.ename%TYPE,
+    sal   emp.sal%TYPE
+  );
+
+  v_emp emp_rec_type;
+BEGIN
+  SELECT empno, ename, sal
+  INTO v_emp
+  FROM emp
+  WHERE empno = 7369;
+
+  DBMS_OUTPUT.PUT_LINE(v_emp.ename || ' - ' || v_emp.sal);
+END;
+/
+
+ ⚠️  Hint :  Order of columns must match record fields
+------------------------------------------------
+
+4️⃣ %ROWTYPE RECORD (Table-Based)
+
+Syntax
+record_variable table_name%ROWTYPE;
+
+-----------------------------
+DECLARE
+  v_emp emp%ROWTYPE;
+BEGIN
+  SELECT *
+  INTO v_emp
+  FROM emp
+  WHERE empno = 7369;
+
+  DBMS_OUTPUT.PUT_LINE(
+    v_emp.ename || ' works as ' || v_emp.job
+  );
+END;
+/
+
+-------------------------------------------------------------------------------------------
+
+🔹 B. Collections
+
+Collections store multiple values of same datatype.
+
+Types of Collections
+
+Collection	Description
+Associative Array	Key-value (INDEX BY)
+Nested Table	Table-like, dynamic
+VARRAY	Fixed size array
+
+
+TYPE num_tab IS TABLE OF NUMBER;
+v_nums num_tab := num_tab(10,20,30);
+
