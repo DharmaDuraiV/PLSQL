@@ -423,11 +423,8 @@ Drops the type even if dependencies exist
 Invalidates:
 
 Tables
-
 Procedures
-
 Functions
-
 Packages
 
 ⚠️ Dangerous in production
@@ -472,7 +469,8 @@ DROP TABLE employees;
 DROP TYPE skill_tab;
 
 
--------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------
 
 👉 Create Nested Table → INSERT → SELECT → UPDATE → DELETE
 All steps are real-time usable + interview ready.
@@ -527,3 +525,109 @@ VALUES (
   skill_tab('python')
 );
 
+------------------------------------------------------------------------------------
+What is TABLE() in Oracle SQL / PL/SQL?
+
+TABLE() is an Oracle operator used to convert a collection (Nested Table / VARRAY) into rows, so you can treat it like a normal relational table in SQL.
+
+👉 In simple words:
+TABLE() = “open the collection and show each element as a row”
+
+✅ Why TABLE() is Needed
+
+Oracle cannot directly SELECT / UPDATE / DELETE elements inside a collection column.
+
+So TABLE() is used to:
+
+Read collection elements
+Update a specific element
+Delete a specific element
+Join collections with tables
+
+🔹 Basic Syntax
+
+TABLE(collection_column)
+
+or
+
+TABLE(SELECT collection_column FROM parent_table WHERE condition)
+
+🔸 Example Based on Your Data
+
+Table:
+employees
+(emp_id, emp_name, skills)
+
+
+----------------------------------------
+🔹 What does TABLE() return?
+
+👉 ONE implicit column named:
+
+COLUMN_VALUE
+
+🔸 Example
+SELECT COLUMN_VALUE
+FROM TABLE(
+  SELECT e.skills
+  FROM employees e
+  WHERE e.emp_id = 101
+);
+
+Output
+PLSQL
+Redis
+MongoDB
+
+
+📌 COLUMN_VALUE
+
+System-generated
+
+Represents each element value
+
+Cannot be renamed inside UPDATE/DELETE
+----------------------------------------
+
+Where skills is a nested table.
+
+🔹 1️⃣ SELECT Using TABLE()
+
+SELECT e.emp_id,
+       e.emp_name,
+       t.COLUMN_VALUE AS skill
+FROM employees e,
+     TABLE(e.skills) t
+where emp_id=101 ;
+
+Output:
+101 | Dharma | PLSQL
+101 | Dharma | Redis
+101 | Dharma | MongoDB
+
+
+
+To update the value Oracle → Redis inside the Nested Table column for emp_id = 101 in Oracle PL/SQL, use the TABLE() expression.
+
+------------------------------------------------------------------------------------
+
+
+✅ Correct UPDATE (Recommended & Standard)
+UPDATE TABLE (
+  SELECT e.skills
+  FROM employees e
+  WHERE e.emp_id = 101
+)
+SET COLUMN_VALUE = 'Redis'
+WHERE COLUMN_VALUE = 'Oracle';
+
+------------------------------------------------------------------------------------
+To delete only the skill SQL from the nested table for emp_id = 102 in Oracle PL/SQL, use the DELETE FROM TABLE() syntax.
+
+✅ Correct DELETE (Standard & Recommended)
+DELETE FROM TABLE (
+  SELECT e.skills
+  FROM employees e
+  WHERE e.emp_id = 102
+)
+WHERE COLUMN_VALUE = 'SQL';
