@@ -1,1 +1,529 @@
 
+Nested Table
+-------------
+
+What is a Nested Table?
+
+ 🔹 A Nested Table is a PL/SQL collection type that:
+ 🔹 Stores multiple values of the same datatype
+ 🔹 Has no fixed size
+ 🔹 Can be stored in a database table column
+ 🔹 Allows DELETE of any element
+
+👉 Think of it as a table inside a variable or column.
+
+Why do we need Nested Tables?
+
+Real company problems they solve:
+
+| Problem                           | Without Nested Table   | With Nested Table    |
+| --------------------------------- | ---------------------- | -------------------- |
+| One customer → many phone numbers | Multiple rows          | One row + collection |
+| One order → many items            | Join tables everywhere | Clean structure      |
+| One employee → many skills        | Extra table required   | Single column        |
+| Pass multiple values to procedure | Repeated calls         | One parameter        |
+
+
+👉 Used when 1 row logically contains multiple values
+
+🧠 Key Features (Important for Interview)
+
+  ✔ Dynamic size
+  ✔ Index starts from 1
+  ✔ Supports DELETE
+  ✔ Can be stored in table column
+  ❌ No guaranteed order
+
+Syntax
+1️⃣ Type Declaration
+TYPE type_name IS TABLE OF datatype;
+
+2️⃣ Variable Declaration
+variable_name type_name;
+
+
+Basic Example (Beginner Level)
+
+Example: Store multiple marks of a student
+
+DECLARE
+  TYPE marks_tab IS TABLE OF NUMBER;
+  v_marks marks_tab := marks_tab(85, 90, 78, 88);
+BEGIN
+  DBMS_OUTPUT.PUT_LINE('First Mark: ' || v_marks(1));
+  DBMS_OUTPUT.PUT_LINE('Total Subjects: ' || v_marks.COUNT);
+END;
+/
+
+Output
+First Mark: 85
+Total Subjects: 4
+
+
+🔧 Common Methods Used
+
+| Method      | Meaning            |
+| ----------- | ------------------ |
+| `COUNT`     | Number of elements |
+| `EXTEND`    | Add new element    |
+| `DELETE`    | Remove element     |
+| `FIRST`     | First index        |
+| `LAST`      | Last index         |
+| `EXISTS(i)` | Check index exists |
+
+📘 PL/SQL Nested Table – EXTEND, COUNT
+------------------------------------------
+
+Example 1: Empty Nested Table – No Data
+---------------------------------------
+
+DECLARE
+  TYPE marks_tab IS TABLE OF NUMBER;
+  v_marks marks_tab := marks_tab();
+BEGIN
+  DBMS_OUTPUT.PUT_LINE('Total Subjects: ' || v_marks.COUNT);
+END;
+/
+
+🔍 Explanation
+
+  🔹 Nested table is initialized but no elements are added.
+  🔹 COUNT returns number of elements present.
+
+✅ Output
+
+Total Subjects: 0
+
+------------------------------------------------------------------------------------
+
+Example 2: Assigning Value Without EXTEND ❌
+------------------------------------------
+
+DECLARE
+  TYPE marks_tab IS TABLE OF NUMBER;
+  v_marks marks_tab := marks_tab();
+BEGIN
+  v_marks(1) := 1;
+  DBMS_OUTPUT.PUT_LINE('Total Subjects: ' || v_marks.COUNT);
+END;
+/
+
+🔍 Explanation
+
+Nested table is empty.
+You are directly assigning v_marks(1) without extending memory.
+Nested tables do not auto-expand.
+
+✅ Output
+
+❌ Error
+ORA-06533: Subscript beyond count
+
+------------------------------------------------------------------------------------
+
+🔹 Example 3: Correct Usage with EXTEND
+------------------------------------------
+
+DECLARE
+  TYPE marks_tab IS TABLE OF NUMBER;
+  v_marks marks_tab := marks_tab();
+BEGIN
+  v_marks.EXTEND;
+  v_marks(1) := 1;
+  DBMS_OUTPUT.PUT_LINE('Total Subjects: ' || v_marks.COUNT);
+END;
+/
+
+🔍 Explanation
+
+EXTEND adds 1 empty element.
+Index 1 now exists.
+Value assignment succeeds.
+
+✅ Output
+
+Total Subjects: 1
+
+------------------------------------------------------------------------------------
+
+🔹 Example 4: EXTEND Only Once, Assign Index 5 ❌
+------------------------------------------
+
+DECLARE
+  TYPE marks_tab IS TABLE OF NUMBER;
+  v_marks marks_tab := marks_tab();
+BEGIN
+  v_marks.EXTEND;
+  v_marks(5) := 1;
+  DBMS_OUTPUT.PUT_LINE('Total Subjects: ' || v_marks.COUNT);
+END;
+/
+
+🔍 Explanation
+
+EXTEND adds only index 1
+Index 5 does not exist
+
+✅ Output
+
+❌ Error
+ORA-06533: Subscript beyond count
+------------------------------------------------------------------------------------
+
+🔹 Example 5: EXTEND(5) – Valid Assignment
+------------------------------------------
+
+DECLARE
+  TYPE marks_tab IS TABLE OF NUMBER;
+  v_marks marks_tab := marks_tab();
+BEGIN
+  v_marks.EXTEND(5);
+  v_marks(5) := 1;
+  DBMS_OUTPUT.PUT_LINE('Total Subjects: ' || v_marks.COUNT);
+END;
+/
+
+🔍 Explanation
+
+EXTEND(5) creates indexes 1 to 5
+Index 5 exists → assignment allowed
+
+✅ Output
+
+Total Subjects: 5
+
+------------------------------------------------------------------------------------
+🔹 Example 6: Initialized Table + EXTEND
+------------------------------------------
+
+DECLARE
+  TYPE marks_tab IS TABLE OF NUMBER;
+  v_marks marks_tab := marks_tab(45,50,78);
+BEGIN
+  v_marks.EXTEND(5);
+  v_marks(5) := 1;
+  DBMS_OUTPUT.PUT_LINE('Total Subjects: ' || v_marks.COUNT);
+END;
+/
+
+🔍 Explanation
+
+Initially: 45, 50, 78 → COUNT = 3
+EXTEND(5) adds 5 more empty elements
+Total elements = 3 + 5 = 8
+Assigning index 5 is valid
+
+✅ Output
+
+Total Subjects: 8
+------------------------------------------------------------------------------------
+
+🔄 Example with Methods
+
+DECLARE
+  TYPE num_tab IS TABLE OF NUMBER;
+  v_num num_tab := num_tab(10, 20, 30);
+BEGIN
+  v_num.EXTEND;
+  v_num(4) := 40;
+ for i in v_num.first .. v_num.last loop
+   DBMS_OUTPUT.PUT_LINE('nested tab index '|| i ||' value is ' || v_num(i));
+ end loop;
+  v_num.DELETE(2); -- deletes value 20
+  IF v_num.EXISTS(2) THEN
+    DBMS_OUTPUT.PUT_LINE('Index 2 exists');
+  ELSE
+    DBMS_OUTPUT.PUT_LINE('Index 2 deleted');
+  END IF;
+ DBMS_OUTPUT.PUT_LINE('Total number of Tabs '||v_num.count);
+  v_num(2) := 47 ;
+ DBMS_OUTPUT.PUT_LINE('Total number of Tabs '||v_num.count);
+END;
+/
+------------------------------------------------------------------------------------
+
+
+🏢 High-Level Example (Company Standard):
+------------------------------------------
+
+🏦 Scenario: One Employee → Multiple Skills
+
+✅ CREATE OR REPLACE TYPE (Nested Table)
+🔹 Syntax
+CREATE OR REPLACE TYPE type_name IS TABLE OF datatype;
+/
+
+🔹 Your Example
+CREATE OR REPLACE TYPE skill_tab IS TABLE OF VARCHAR2(50);
+/
+
+
+✔ Replaces the existing type if it exists
+✔ Creates it if it does not exist
+
+🗂️ Oracle Version Support (VERY IMPORTANT)
+
+| Oracle Version | Support         |
+| -------------- | --------------- |
+| 11g and below  | ❌ NOT supported |
+| **12c**        | ✅ Supported     |
+| **18c**        | ✅ Supported     |
+| **19c**        | ✅ Supported     |
+| **21c**        | ✅ Supported     |
+| **23c**        | ✅ Supported     |
+
+👉 Introduced in Oracle 12c
+
+⚠️ RULES (Company / Interview Critical)
+✅ Allowed When:
+-----------------
+
+No dependent table has data OR
+Change is compatible
+Same datatype
+Size increase (VARCHAR2(50 → 100))
+
+CREATE OR REPLACE TYPE skill_tab IS TABLE OF VARCHAR2(100);
+/
+✔ Works in many cases
+
+❌ NOT Allowed When:
+---------------------
+
+Type is used in a table column with data
+Change breaks structure
+
+CREATE OR REPLACE TYPE skill_tab IS TABLE OF NUMBER;
+/
+
+
+❌ Error:
+
+ORA-02303: cannot drop or replace a type with table dependents
+
+
+🔍 What Happens Internally
+-----------------------------------
+
+Oracle checks dependencies
+Oracle validates compatibility
+If safe → replaces definition
+If unsafe → throws error
+
+🏢 Company Standard Usage
+Development Environment
+
+✔ Use CREATE OR REPLACE TYPE
+
+Production Environment
+
+❌ Avoid direct replace
+✔ Use:
+skill_tab_v2
+
+✔ Controlled migration
+
+------------------------------------------------------------
+✅ 1️⃣ List ALL TYPEs in your schema (MOST COMMON)
+SELECT type_name
+FROM user_types;
+
+
+✔ Shows all user-defined TYPEs
+✔ Used in day-to-day development
+
+✅ 2️⃣ Check a Specific TYPE (your case: SKILL_TAB)
+SELECT type_name, typecode
+FROM user_types
+WHERE type_name = 'SKILL_TAB';
+
+Output Example
+SKILL_TAB   COLLECTION
+
+
+👉 COLLECTION = Nested Table / VARRAY
+👉 OBJECT = Object Type
+
+✅ 3️⃣ See TYPE Definition (VERY IMPORTANT)
+SELECT text
+FROM user_source
+WHERE name = 'SKILL_TAB'
+ORDER BY line;
+
+
+✔ Shows exact CREATE TYPE code
+✔ Useful in interviews & debugging
+
+✅ 4️⃣ Check What Objects Depend on a TYPE (CRITICAL)
+SELECT name, type
+FROM user_dependencies
+WHERE referenced_name = 'SKILL_TAB';
+
+Example Output
+EMPLOYEES   TABLE
+
+
+👉 Means employees table uses this type
+
+✅ 5️⃣ Check If TYPE Is Used in a Table Column
+SELECT table_name, column_name, data_type
+FROM user_tab_columns
+WHERE data_type = 'SKILL_TAB';
+
+
+✔ Confirms where the nested table is used
+
+✅ 6️⃣ Check Storage Table of Nested Table
+SELECT table_name
+FROM user_nested_tables
+WHERE column_name = 'SKILLS';
+
+Example Output
+EMP_SKILLS_NT
+
+
+👉 This is the physical storage table
+
+✅ 7️⃣ Check ALL Nested Tables in Schema
+SELECT parent_table_name,
+       parent_table_column,
+       table_name AS storage_table
+FROM user_nested_tables;
+-----------------------------------------------------------------------------------
+
+🗑️ HOW TO DROP TYPE IN ORACLE
+✅ 1️⃣ Basic Syntax (When NO Dependencies)
+🔹 Syntax
+DROP TYPE type_name;
+
+🔹 Example
+DROP TYPE skill_tab;
+
+
+✔ Works only if the type is NOT used anywhere
+✔ Safe and clean
+
+❌ If TYPE Is Used → Error
+
+If skill_tab is used in a table or procedure:
+
+ORA-02303: cannot drop or replace a type with table dependents
+
+✅ 2️⃣ Drop TYPE with FORCE (IMPORTANT)
+🔹 Syntax
+DROP TYPE type_name FORCE;
+
+🔹 Example
+DROP TYPE skill_tab FORCE;
+
+🔍 What FORCE Does
+
+Drops the type even if dependencies exist
+
+Invalidates:
+
+Tables
+
+Procedures
+
+Functions
+
+Packages
+
+⚠️ Dangerous in production
+
+🏢 Company-Standard SAFE Way (BEST PRACTICE)
+Step 1️⃣ Check Dependencies
+SELECT name, type
+FROM user_dependencies
+WHERE referenced_name = 'SKILL_TAB';
+
+Step 2️⃣ Drop Dependent Objects First
+DROP TABLE employees;
+
+
+(or procedures, packages using the type)
+
+Step 3️⃣ Drop the TYPE
+DROP TYPE skill_tab;
+
+
+✔ Clean
+✔ No broken objects
+
+✅ 3️⃣ Drop Nested Table Storage Table (Automatic)
+
+When you drop the parent table:
+
+DROP TABLE employees;
+
+
+✔ Oracle automatically drops
+
+emp_skills_nt
+
+
+(No need to drop manually)
+
+🔁 4️⃣ Full Cleanup Example (Real Project)
+
+DROP TABLE employees;
+
+DROP TYPE skill_tab;
+
+
+-------------------------------------------------------------------------
+
+👉 Create Nested Table → INSERT → SELECT → UPDATE → DELETE
+All steps are real-time usable + interview ready.
+
+
+
+🔹 STEP 1: Create Nested Table TYPE
+
+CREATE OR REPLACE TYPE skill_tab IS TABLE OF VARCHAR2(50);
+/
+
+
+✔ Database-level collection type
+✔ Reusable across tables, procedures
+
+
+
+🔹 STEP 2: Create Table Using Nested Table
+
+CREATE TABLE employees (
+  emp_id   NUMBER PRIMARY KEY,
+  emp_name VARCHAR2(50),
+  skills   skill_tab
+)
+NESTED TABLE skills STORE AS emp_skills_nt;
+
+
+✔ emp_skills_nt → internal storage table
+✔ One employee → many skills
+
+
+🔹 STEP 3: INSERT (DML – INSERT)
+
+🔸 Insert full nested table
+INSERT INTO employees
+VALUES (
+  101,
+  'Dharma',
+  skill_tab('PLSQL', 'Oracle', 'MongoDB')
+);
+
+INSERT INTO employees
+VALUES (
+  102,
+  'Manu',
+  skill_tab('SQL', 'JAVA', 'Spring Boot')
+);
+INSERT INTO employees
+VALUES (
+  103,
+  'Manu',
+  skill_tab('python')
+);
+
