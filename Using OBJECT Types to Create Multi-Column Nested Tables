@@ -1,8 +1,57 @@
 🔹 What is an OBJECT Type in Oracle SQL / PL/SQL?
 
-An OBJECT type is a user-defined datatype that allows you to group multiple related attributes (columns) into a single logical unit, similar to a class in programming.
+An OBJECT type is a user-defined datatype that allows you to group multiple related attributes (columns) into a single logical unit, similar to a class/object in programming.
+
+1️⃣ JavaScript Object (Like Oracle OBJECT Type)
+const skill = {
+  skillName: "PLSQL",
+  experience: 5,
+  level: "ADVANCED"
+};
+
+🧠 Explanation
+
+skill → ONE logical unit
+skillName, experience, level → attributes (properties)
+This is exactly how Oracle OBJECT TYPE works
 
 
+🔹 Step 1️⃣ Create an OBJECT Type
+
+(Each attribute = one column)
+
+CREATE OR REPLACE TYPE skill_obj AS OBJECT (
+  skill_name VARCHAR2(50),
+  experience NUMBER,
+  level       VARCHAR2(20)
+);
+/
+
+
+
+Multiple Skills (Collection of Objects)
+const skills = [
+  { skillName: "PLSQL", experience: 5, level: "ADVANCED" },
+  { skillName: "Redis", experience: 3, level: "INTERMEDIATE" },
+  { skillName: "MongoDB", experience: 4, level: "ADVANCED" }
+];
+
+🔹 Oracle Collection (Like JS Array)
+CREATE TYPE skill_tab IS TABLE OF skill_obj;
+/
+
+Equivalent to:
+
+const skills = [ skillObj1, skillObj2 ];
+
+🔹 Step 2️⃣ Create Nested Table of OBJECT Type
+CREATE OR REPLACE TYPE skill_tab IS TABLE OF skill_obj;
+/
+
+
+
+-------------------------------------------------------------------------------------------
+EXAMPLE:
 
 
 
@@ -20,6 +69,7 @@ CREATE OR REPLACE TYPE skill_obj AS OBJECT (
 
 ✔ Each attribute becomes a column
 ✔ Reusable across tables
+
 
 🔹 Step 2️⃣ Create Nested Table of OBJECT Type
 CREATE OR REPLACE TYPE skill_tab IS TABLE OF skill_obj;
@@ -74,3 +124,6 @@ DELETE FROM TABLE (
   WHERE e.emp_id = 101
 )
 WHERE skill_name = 'Redis';
+
+
+
