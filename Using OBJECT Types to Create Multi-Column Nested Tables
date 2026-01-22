@@ -1,0 +1,76 @@
+🔹 What is an OBJECT Type in Oracle SQL / PL/SQL?
+
+An OBJECT type is a user-defined datatype that allows you to group multiple related attributes (columns) into a single logical unit, similar to a class in programming.
+
+
+
+
+
+🔹 Step 1️⃣ Create an OBJECT Type
+
+(Each attribute = one column)
+
+CREATE OR REPLACE TYPE skill_obj AS OBJECT (
+  skill_name VARCHAR2(50),
+  experience NUMBER,
+  level       VARCHAR2(20)
+);
+/
+
+
+✔ Each attribute becomes a column
+✔ Reusable across tables
+
+🔹 Step 2️⃣ Create Nested Table of OBJECT Type
+CREATE OR REPLACE TYPE skill_tab IS TABLE OF skill_obj;
+/
+
+🔹 Step 3️⃣ Create Table Using Object Collection
+CREATE TABLE employees (
+  emp_id   NUMBER PRIMARY KEY,
+  emp_name VARCHAR2(50),
+  skills   skill_tab
+)
+NESTED TABLE skills STORE AS emp_skills_nt;
+
+🔹 Step 4️⃣ Insert Data (Multiple Columns)
+INSERT INTO employees VALUES (
+  101,
+  'Dharma',
+  skill_tab(
+    skill_obj('PLSQL', 5, 'ADVANCED'),
+    skill_obj('Redis', 3, 'INTERMEDIATE'),
+    skill_obj('MongoDB', 4, 'ADVANCED')
+  )
+);
+
+🔹 Step 5️⃣ SELECT (Now You Get Multiple Columns)
+SELECT e.emp_id,
+       e.emp_name,
+       t.skill_name,
+       t.experience,
+       t.level
+FROM employees e,
+     TABLE(e.skills) t;
+
+✅ Output
+101 | Dharma | PLSQL   | 5 | ADVANCED
+101 | Dharma | Redis   | 3 | INTERMEDIATE
+101 | Dharma | MongoDB | 4 | ADVANCED
+
+🔹 UPDATE One Column Inside Object
+UPDATE TABLE (
+  SELECT e.skills
+  FROM employees e
+  WHERE e.emp_id = 101
+)
+SET experience = 6
+WHERE skill_name = 'PLSQL';
+
+🔹 DELETE One Skill
+DELETE FROM TABLE (
+  SELECT e.skills
+  FROM employees e
+  WHERE e.emp_id = 101
+)
+WHERE skill_name = 'Redis';
