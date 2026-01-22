@@ -23,7 +23,7 @@ This is exactly how Oracle OBJECT TYPE works
 CREATE OR REPLACE TYPE skill_obj AS OBJECT (
   skill_name VARCHAR2(50),
   experience NUMBER,
-  level       VARCHAR2(20)
+  level VARCHAR2(20)
 );
 /
 
@@ -108,7 +108,11 @@ FROM employees e,
 101 | Dharma | Redis   | 3 | INTERMEDIATE
 101 | Dharma | MongoDB | 4 | ADVANCED
 
+notes :
+TABLE() can ONLY work on a COLLECTION,
+
 🔹 UPDATE One Column Inside Object
+
 UPDATE TABLE (
   SELECT e.skills
   FROM employees e
@@ -117,13 +121,16 @@ UPDATE TABLE (
 SET experience = 6
 WHERE skill_name = 'PLSQL';
 
+
 🔹 DELETE One Skill
+
 DELETE FROM TABLE (
   SELECT e.skills
   FROM employees e
   WHERE e.emp_id = 101
 )
 WHERE skill_name = 'Redis';
+
 
 
 
