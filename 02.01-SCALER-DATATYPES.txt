@@ -1,0 +1,52 @@
+1️⃣ Scalar Datatypes (Single Value)
+
+Scalar datatypes store only one value at a time.
+
+🔹 A. Numeric Datatypes
+Datatype	Description
+NUMBER	General numeric
+PLS_INTEGER	Fast integer (recommended)
+BINARY_INTEGER	Old integer
+SIMPLE_INTEGER	Fastest, no NULL
+
+Example :
+
+     
+DECLARE
+  v_salary NUMBER(10,2);
+  v_count  PLS_INTEGER;
+BEGIN
+  v_salary := 45000.50;
+  v_count  := 10;
+END;
+/
+
+🔹 B. Character Datatypes
+Datatype	Description
+VARCHAR2	Variable length text
+CHAR	Fixed length
+LONG	Large text (deprecated)
+
+Example :
+
+     v_name VARCHAR2(50);
+
+🔹 C. Date & Time Datatypes
+Datatype
+DATE
+TIMESTAMP
+TIMESTAMP WITH TIME ZONE
+
+Example :
+
+     v_hire_date DATE := SYSDATE;
+
+🔹 D. Boolean Datatype (PL/SQL Only ⭐)
+Datatype
+BOOLEAN
+
+Example :
+
+     v_active BOOLEAN := TRUE;
+
+🚫 Not allowed in SQL tables.
