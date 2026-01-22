@@ -1,0 +1,15 @@
+🔹 What is a Datatype?
+
+A Datatype defines:
+
+What kind of data a column or variable can store
+How much space it occupies
+What operations can be performed on it
+
+PL/SQL Datatypes
+│
+├── 1) Scalar Datatypes
+├── 2) Reference Datatypes
+├── 3) Composite Datatypes
+└── 4) LOB Datatypes
+├── 5) Boolean Datatypes
