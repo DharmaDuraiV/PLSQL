@@ -1,0 +1,12 @@
+EXCEPTION:
+------------
+
+Exception is a runtime error that occurs while the PL/SQL program is executing.
+PL/SQL provides a way to handle these errors using an EXCEPTION section.
+This helps prevent program crashes and allows custom error messages or actions.
+
+
+THERE ARE 2 TYPES OF EXCEPTIONS SUPPORTED BY ORACLE
+
+1.  	PREDEFINED EXCEPTIONS
+2.  	USER-DEFINED EXCEPTIONS
