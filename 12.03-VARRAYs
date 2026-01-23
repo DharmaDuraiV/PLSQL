@@ -1,1 +1,276 @@
+1️⃣ What is VARRAY?
+
+VARRAY (Variable-size Array) is a collection datatype in PL/SQL used to store multiple values of the same datatype in a fixed-size, ordered list.
+
+👉 Elements are stored sequentially and accessed using index numbers.
+
+2️⃣ Why VARRAY?
+
+VARRAY is used when:
+
+Maximum number of elements is known in advance
+Data must be stored and fetched as a single unit
+Order of elements must be preserved
+
+Example:
+✔ Phone numbers (max 3)
+✔ Employee skills (max 5)
+✔ Monthly ratings (max 12)
+
+3️⃣ Key Characteristics
+
+Fixed maximum size
+Index starts from 1
+Stored inside database tables
+Always dense (no gaps allowed)
+Maintains order of insertion
+
+4️⃣ Syntax
+
+Type Declaration
+
+        TYPE type_name IS VARRAY(max_size) OF datatype;
+
+Variable Declaration
+
+        var_name type_name;
+
+5️⃣ Simple Example (Beginner)
+
+DECLARE
+  TYPE num_varray IS VARRAY(5) OF NUMBER;
+  v_nums num_varray := num_varray(10, 20, 30);
+BEGIN
+  DBMS_OUTPUT.PUT_LINE(v_nums(1));
+END;
+/
+
+
+6️⃣ Common VARRAY Methods
+
+| Method | Purpose             |
+| ------ | ------------------- |
+| COUNT  | Number of elements  |
+| FIRST  | First index         |
+| LAST   | Last index          |
+| EXTEND | Add element         |
+| TRIM   | Remove last element |
+| LIMIT  | Maximum size        |
+
+
+7️⃣ Example Using Methods
+DECLARE
+  TYPE name_varray IS VARRAY(3) OF VARCHAR2(20);
+  v_names name_varray := name_varray('Ram');
+BEGIN
+  v_names.EXTEND;
+  v_names(2) := 'Sam';
+
+  DBMS_OUTPUT.PUT_LINE('Total: ' || v_names.COUNT);
+  DBMS_OUTPUT.PUT_LINE('Limit: ' || v_names.LIMIT);
+END;
+/
+
+
+8️⃣ Limitation of VARRAY
+
+❌ Cannot exceed the maximum size.
+
+v_names.EXTEND; -- Error if LIMIT reached
+
+Error:
+ORA-06532: Subscript outside of limit
+
+
+9️⃣ Looping Through VARRAY
+
+FOR i IN 1 .. v_nums.COUNT LOOP
+  DBMS_OUTPUT.PUT_LINE(v_nums(i));
+END LOOP;
+
+
+🔟 VARRAY at Database Level
+Create Type
+CREATE TYPE phone_varray IS VARRAY(3) OF VARCHAR2(15);
+/
+
+Create Table
+CREATE TABLE customers (
+  cust_id NUMBER,
+  phones  phone_varray
+);
+
+Insert Data
+INSERT INTO customers VALUES (
+  1,
+  phone_varray('9876543210', '9123456789')
+);
+
+1️⃣1️⃣ Read VARRAY Data
+SELECT c.cust_id, p.COLUMN_VALUE AS phone
+FROM customers c,
+     TABLE(c.phones) p;
+
+
+-------------------------------------------------------------------------
+
+1️⃣ COUNT – Number of Elements
+🔹 What?
+
+Returns the current number of elements in the VARRAY.
+
+🔹 Why?
+
+To know how many values are present (used in loops).
+
+🔹 Example
+DECLARE
+  TYPE num_varray IS VARRAY(5) OF NUMBER;
+  v_nums num_varray := num_varray(10, 20, 30);
+BEGIN
+  DBMS_OUTPUT.PUT_LINE(v_nums.COUNT);
+END;
+/
+
+🔹 Output
+3
+
+---------------------------------------------------------------------------------------
+2️⃣ FIRST – First Index
+🔹 What?
+
+Returns the first index in the VARRAY.
+
+🔹 Why?
+
+To know where the collection starts.
+
+🔹 Example
+
+DECLARE
+  TYPE num_varray IS VARRAY(5) OF NUMBER;
+  v_nums num_varray := num_varray(10, 20, 30);
+BEGIN
+  DBMS_OUTPUT.PUT_LINE(v_nums.COUNT);
+END;
+/
+
+🔹 Output
+1
+---------------------------------------------------------------------------------------
+
+3️⃣ LAST – Last Index
+🔹 What?
+
+Returns the last index position of the VARRAY.
+
+🔹 Why?
+
+To find the last element index.
+
+🔹 Example
+
+DECLARE
+  TYPE num_varray IS VARRAY(5) OF NUMBER;
+  v_nums num_varray := num_varray(10, 20, 30);
+BEGIN
+  DBMS_OUTPUT.PUT_LINE(v_nums.COUNT);
+END;
+/
+
+🔹 Output
+3
+
+--------------------------------------------------------
+4️⃣ EXTEND – Add Element
+🔹 What?
+
+Adds a new empty element at the end of the VARRAY.
+
+🔹 Why?
+
+To insert values dynamically.
+
+🔹 Example
+DECLARE
+  TYPE num_varray IS VARRAY(5) OF NUMBER;
+  v_nums num_varray := num_varray(10, 20);
+BEGIN
+  v_nums.EXTEND;     -- adds position 3
+  v_nums(3) := 30;
+
+  DBMS_OUTPUT.PUT_LINE(v_nums.COUNT);
+END;
+/
+
+🔹 Output
+3
+
+-------
+notes 
+i have declare the array to store the 5 element 
+initially i have stored a 2 element i need to store the 3 element so i need to use the extent key word 
+along with the extent key word we can you size but if you try to extend more the size of declaration it throw the error 
+initially i declared 5 later i used 2 to the values after that i have planed to extent -4 now the total array size become 6 
+already we that varray is fixed size so it throw the error .
+
+--------------
+DECLARE
+  TYPE num_varray IS VARRAY(5) OF NUMBER;
+  v_nums num_varray := num_varray(10, 20);
+BEGIN
+  v_nums.EXTEND(4);     -- adds position 3
+  v_nums(5) := 30;
+  DBMS_OUTPUT.PUT_LINE(v_nums.COUNT);
+END;
+/
+
+❌ If EXTEND exceeds LIMIT → ERROR.
+
+
+--------------------------------------------------------
+
+5️⃣ TRIM – Remove Last Element
+🔹 What?
+
+Removes the last element from the VARRAY.
+
+🔹 Why?
+
+To delete recently added data.
+
+🔹 Example
+DECLARE
+  TYPE num_varray IS VARRAY(5) OF NUMBER;
+  v_nums num_varray := num_varray(10, 20, 30);
+BEGIN
+  v_nums.TRIM;
+
+  DBMS_OUTPUT.PUT_LINE(v_nums.COUNT);
+END;
+/
+
+--------------------------------------------------------
+
+6️⃣ LIMIT – Maximum Size
+🔹 What?
+
+Returns the maximum number of elements allowed.
+
+🔹 Why?
+
+To prevent runtime errors before EXTEND.
+
+🔹 Example
+BEGIN
+  DBMS_OUTPUT.PUT_LINE(v_nums.LIMIT);
+END;
+/
+
+🔹 Output
+5
+
+🔹 Output
+2
+
 
