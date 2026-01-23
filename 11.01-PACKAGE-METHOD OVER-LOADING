@@ -1,0 +1,189 @@
+🔁 METHOD OVER-LOADING IN PACKAGE
+
+🔹 What is Method Over-Loading?
+
+Multiple procedures/functions with the same name
+but different parameter lists.
+
+📦 PACKAGE WITH METHOD OVER-LOADING
+1️⃣ Package Specification
+CREATE OR REPLACE PACKAGE emp_pkg IS
+
+  -- Overloaded procedures
+  PROCEDURE show_emp(p_empno emp.empno%TYPE);
+
+  PROCEDURE show_emp(p_ename emp.ename%TYPE);
+
+END emp_pkg;
+/
+
+2️⃣ Package Body
+CREATE OR REPLACE PACKAGE BODY emp_pkg IS
+
+  -- Procedure 1: By EMPNO
+  PROCEDURE show_emp(p_empno emp.empno%TYPE) IS
+    v_emp emp%ROWTYPE;
+  BEGIN
+    SELECT *
+    INTO   v_emp
+    FROM   emp
+    WHERE  empno = p_empno;
+
+    DBMS_OUTPUT.PUT_LINE(
+      'EmpNo: ' || v_emp.empno ||
+      ' Name: ' || v_emp.ename ||
+      ' Salary: ' || v_emp.sal
+    );
+  END show_emp;
+
+
+  -- Procedure 2: By ENAME
+  PROCEDURE show_emp(p_ename emp.ename%TYPE) IS
+    v_emp emp%ROWTYPE;
+  BEGIN
+    SELECT *
+    INTO   v_emp
+    FROM   emp
+    WHERE  ename = p_ename;
+
+    DBMS_OUTPUT.PUT_LINE(
+      'EmpNo: ' || v_emp.empno ||
+      ' Name: ' || v_emp.ename ||
+      ' Salary: ' || v_emp.sal
+    );
+  END show_emp;
+
+END emp_pkg;
+/
+
+3️⃣ How Oracle Decides Which One to Call
+BEGIN
+  emp_pkg.show_emp(7369);     -- calls EMPNO version
+  emp_pkg.show_emp('SMITH');  -- calls ENAME version
+END;
+/
+
+---------------------------------------------------------------------------------
+📌 Business Use Case
+
+A single Employee Service Package used by HR, Reports, and APIs.
+
+1️⃣ Package Specification (Public API)
+CREATE OR REPLACE PACKAGE emp_service_pkg IS
+
+  -- Show employee by EMPNO
+  PROCEDURE get_employee(p_empno emp.empno%TYPE);
+
+  -- Show employee by ENAME (OVERLOADED)
+  PROCEDURE get_employee(p_ename emp.ename%TYPE);
+
+  -- Show all employees of a department
+  PROCEDURE get_dept_employees(p_deptno dept.deptno%TYPE);
+
+END emp_service_pkg;
+/
+
+2️⃣ Package Body (Business Logic)
+CREATE OR REPLACE PACKAGE BODY emp_service_pkg IS
+
+  /* ==================================================
+     Procedure: get_employee (by EMPNO)
+     ================================================== */
+  PROCEDURE get_employee(p_empno emp.empno%TYPE) IS
+    v_emp  emp%ROWTYPE;
+    v_dept dept%ROWTYPE;
+  BEGIN
+    SELECT *
+    INTO   v_emp
+    FROM   emp
+    WHERE  empno = p_empno;
+
+    SELECT *
+    INTO   v_dept
+    FROM   dept
+    WHERE  deptno = v_emp.deptno;
+
+    DBMS_OUTPUT.PUT_LINE('Employee Details');
+    DBMS_OUTPUT.PUT_LINE('----------------');
+    DBMS_OUTPUT.PUT_LINE('Emp No   : ' || v_emp.empno);
+    DBMS_OUTPUT.PUT_LINE('Name     : ' || v_emp.ename);
+    DBMS_OUTPUT.PUT_LINE('Job      : ' || v_emp.job);
+    DBMS_OUTPUT.PUT_LINE('Salary   : ' || v_emp.sal);
+    DBMS_OUTPUT.PUT_LINE('Dept     : ' || v_dept.dname);
+    DBMS_OUTPUT.PUT_LINE('Location : ' || v_dept.loc);
+
+  EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+      DBMS_OUTPUT.PUT_LINE('❌ Employee not found');
+  END get_employee;
+
+
+  /* ==================================================
+     Procedure: get_employee (by ENAME)  [OVERLOADING]
+     ================================================== */
+  PROCEDURE get_employee(p_ename emp.ename%TYPE) IS
+    v_emp emp%ROWTYPE;
+  BEGIN
+    SELECT *
+    INTO   v_emp
+    FROM   emp
+    WHERE  ename = p_ename;
+
+    get_employee(v_emp.empno); -- reuse logic
+
+  EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+      DBMS_OUTPUT.PUT_LINE('❌ Employee not found');
+  END get_employee;
+
+
+  /* ==================================================
+     Procedure: get_dept_employees
+     ================================================== */
+  PROCEDURE get_dept_employees(p_deptno dept.deptno%TYPE) IS
+
+    CURSOR emp_cur IS
+      SELECT empno, ename, job, sal
+      FROM emp
+      WHERE deptno = p_deptno;
+
+    v_emp emp_cur%ROWTYPE;
+
+  BEGIN
+    DBMS_OUTPUT.PUT_LINE(
+      'Employees in Department ' || p_deptno
+    );
+    DBMS_OUTPUT.PUT_LINE('-------------------------');
+
+    OPEN emp_cur;
+    LOOP
+      FETCH emp_cur INTO v_emp;
+      EXIT WHEN emp_cur%NOTFOUND;
+
+      DBMS_OUTPUT.PUT_LINE(
+        v_emp.empno || ' | ' ||
+        v_emp.ename || ' | ' ||
+        v_emp.job   || ' | ' ||
+        v_emp.sal
+      );
+    END LOOP;
+    CLOSE emp_cur;
+
+  EXCEPTION
+    WHEN OTHERS THEN
+      IF emp_cur%ISOPEN THEN
+        CLOSE emp_cur;
+      END IF;
+      DBMS_OUTPUT.PUT_LINE('❌ Error: ' || SQLERRM);
+  END get_dept_employees;
+
+END emp_service_pkg;
+/
+
+3️⃣ How This Is Used (Real Life)
+BEGIN
+  emp_service_pkg.get_employee(7369);
+  emp_service_pkg.get_employee('SMITH');
+  emp_service_pkg.get_dept_employees(20);
+END;
+/
