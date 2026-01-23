@@ -1,1 +1,860 @@
+Package
 
+📦 What is a Package in PL/SQL?
+
+A package in PL/SQL is a container that groups related program units together, such as:
+
+Procedures
+Functions
+Variables
+Cursors
+Types
+
+
+❓ Why do we need Packages?
+Problems WITHOUT packages 😵
+
+Code scattered everywhere
+Hard to maintain
+Same logic repeated
+Security issues
+
+Advantages WITH packages 😎
+
+Better Organization
+  Related logic in one place
+Reusability
+  Write once, use many times
+Security 🔐
+  You can hide internal logic
+Performance ⚡
+  Package is loaded once into memory
+Easy Maintenance
+  Change body, no need to change spec (if interface same)
+
+🧠 Package has TWO parts
+1️⃣ Package Specification (SPEC)
+
+Declaration part
+  Tells WHAT is available to outside users
+
+2️⃣ Package Body (BODY)
+
+Implementation part
+  Tells HOW it works
+
+📌 Rule:
+Spec first → then Body
+
+PACKAGE SYNTAX (PL/SQL)
+1️⃣ Package Specification (Syntax)
+CREATE OR REPLACE PACKAGE package_name IS
+  -- variable declarations
+  -- cursor declarations
+  -- procedure declarations
+  -- function declarations
+END package_name;
+/
+
+2️⃣ Package Body (Syntax)
+CREATE OR REPLACE PACKAGE BODY package_name IS
+  -- private variable declarations
+  -- private procedures / functions
+  
+  PROCEDURE procedure_name 
+  IS
+  BEGIN
+    -- statements
+  END procedure_name;
+
+  FUNCTION function_name RETURN datatype 
+  IS
+  BEGIN
+    -- statements
+    RETURN value;
+  END function_name;
+
+END package_name;
+/
+
+3️⃣ Syntax with Public & Private Members
+Package Spec (Public)
+CREATE OR REPLACE PACKAGE demo_pkg IS
+  PROCEDURE public_proc;
+END demo_pkg;
+/
+
+Package Body (Private + Public)
+CREATE OR REPLACE PACKAGE BODY demo_pkg IS
+
+  -- private member
+  PROCEDURE private_proc IS
+  BEGIN
+    NULL;
+  END private_proc;
+
+  -- public member
+  PROCEDURE public_proc IS
+  BEGIN
+    private_proc;
+  END public_proc;
+
+END demo_pkg;
+/
+
+4️⃣ Calling Package Members (Syntax)
+Call Procedure
+BEGIN
+  package_name.procedure_name;
+END;
+/
+
+Call Function
+SELECT package_name.function_name
+FROM dual;
+
+
+
+-------------------------------------------------------------------------------------------
+📦 PACKAGE WITH ONLY VARIABLES
+1️⃣ Package Specification (Declaration ONLY)
+
+CREATE OR REPLACE PACKAGE app_config_pkg IS
+
+  -- public variables (no initialization here)
+  g_company_name   VARCHAR2(50);
+  g_tax_percent    NUMBER;
+  g_bonus_amount   NUMBER;
+
+END app_config_pkg;
+/
+
+
+📌 Spec = WHAT variables exist
+📌 NO values here
+
+
+2️⃣ Package Body (Initialization Section)
+
+
+CREATE OR REPLACE PACKAGE BODY app_config_pkg IS
+
+BEGIN
+  -- initialization block (runs once per session)
+  g_company_name := 'Test Yantra';
+  g_tax_percent  := 10;
+  g_bonus_amount := 5000;
+END app_config_pkg;
+/
+
+✅ This BEGIN…END is called the Package Initialization Section
+
+3️⃣ How to Use These Variables
+BEGIN
+  DBMS_OUTPUT.PUT_LINE(app_config_pkg.g_company_name);
+  DBMS_OUTPUT.PUT_LINE(app_config_pkg.g_tax_percent);
+  DBMS_OUTPUT.PUT_LINE(app_config_pkg.g_bonus_amount);
+END;
+/
+
+-------------------------------------------------------------------------------------------
+📦 PACKAGE WITH ONLY VARIABLES
+
+📦 PACKAGE USING EMP & DEPT
+🔹 TYPE + RECORD + %ROWTYPE
+
+1️⃣ Assumed Tables (Standard Oracle)
+EMP  (empno, ename, job, sal, deptno)
+DEPT (deptno, dname, loc)
+
+
+2️⃣ Package Specification
+
+👉 Declare TYPES & VARIABLES only
+
+CREATE OR REPLACE PACKAGE emp_dept_pkg IS
+
+  -- RECORD using TYPE (custom structure)
+  TYPE emp_basic_rec IS RECORD (
+    empno  emp.empno%TYPE,
+    ename  emp.ename%TYPE,
+    sal    emp.sal%TYPE
+  );
+
+  -- RECORD variable
+  g_emp_basic emp_basic_rec;
+
+  -- %ROWTYPE variables
+  g_emp_row   emp%ROWTYPE;
+  g_dept_row  dept%ROWTYPE;
+
+END emp_dept_pkg;
+/
+
+
+📌 Spec = structure definition (WHAT exists)
+
+3️⃣ Package Body
+
+👉 Initialize values using SELECT INTO
+
+CREATE OR REPLACE PACKAGE BODY emp_dept_pkg IS
+
+BEGIN
+  -- Load EMP basic details using RECORD TYPE
+  SELECT empno, ename, sal
+  INTO   g_emp_basic
+  FROM   emp
+  WHERE  empno = 7369;
+
+  -- Load full EMP row using %ROWTYPE
+  SELECT *
+  INTO   g_emp_row
+  FROM   emp
+  WHERE  empno = 7369;
+
+  -- Load DEPT row using %ROWTYPE
+  SELECT *
+  INTO   g_dept_row
+  FROM   dept
+  WHERE  deptno = g_emp_row.deptno;
+
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    NULL; -- handled safely
+END emp_dept_pkg;
+/
+
+📌 Runs ONCE per session when package is first referenced
+
+4️⃣ How to Use the Package Data
+BEGIN
+  DBMS_OUTPUT.PUT_LINE('Emp No   : ' || emp_dept_pkg.g_emp_basic.empno);
+  DBMS_OUTPUT.PUT_LINE('Name     : ' || emp_dept_pkg.g_emp_basic.ename);
+  DBMS_OUTPUT.PUT_LINE('Salary   : ' || emp_dept_pkg.g_emp_basic.sal);
+
+  DBMS_OUTPUT.PUT_LINE('Job      : ' || emp_dept_pkg.g_emp_row.job);
+  DBMS_OUTPUT.PUT_LINE('Dept     : ' || emp_dept_pkg.g_dept_row.dname);
+  DBMS_OUTPUT.PUT_LINE('Location : ' || emp_dept_pkg.g_dept_row.loc);
+END;
+/
+
+
+
+-------------------------------------------------------------------------------------------
+📦 PACKAGE WITH ONLY PROCEDURE
+
+1️⃣ Package Specification
+
+CREATE OR REPLACE PACKAGE emp_dept_pkg IS
+  PROCEDURE show_emp_details;
+END emp_dept_pkg;
+/
+
+2️⃣ Package Body
+
+👉 All logic + variables are inside the procedure only
+
+CREATE OR REPLACE PACKAGE BODY emp_dept_pkg IS
+
+  PROCEDURE show_emp_details IS
+
+    -- %ROWTYPE variables (LOCAL)
+    v_emp  emp%ROWTYPE;
+    v_dept dept%ROWTYPE;
+
+    -- local constant / value
+    v_empno emp.empno%TYPE := 7369;
+
+  BEGIN
+    DBMS_OUTPUT.PUT_LINE('🔄 Fetching employee details');
+
+    -- Get EMP data
+    SELECT *
+    INTO   v_emp
+    FROM   emp
+    WHERE  empno = v_empno;
+
+    -- Get DEPT data
+    SELECT *
+    INTO   v_dept
+    FROM   dept
+    WHERE  deptno = v_emp.deptno;
+
+    -- Print output
+    DBMS_OUTPUT.PUT_LINE('----------------------------');
+    DBMS_OUTPUT.PUT_LINE('Employee Details');
+    DBMS_OUTPUT.PUT_LINE('----------------------------');
+    DBMS_OUTPUT.PUT_LINE('Emp No   : ' || v_emp.empno);
+    DBMS_OUTPUT.PUT_LINE('Name     : ' || v_emp.ename);
+    DBMS_OUTPUT.PUT_LINE('Job      : ' || v_emp.job);
+    DBMS_OUTPUT.PUT_LINE('Salary   : ' || v_emp.sal);
+    DBMS_OUTPUT.PUT_LINE('Dept     : ' || v_dept.dname);
+    DBMS_OUTPUT.PUT_LINE('Location : ' || v_dept.loc);
+
+  EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+      DBMS_OUTPUT.PUT_LINE('❌ Employee not found');
+
+    WHEN OTHERS THEN
+      DBMS_OUTPUT.PUT_LINE('❌ Error: ' || SQLERRM);
+  END show_emp_details;
+
+END emp_dept_pkg;
+/
+
+3️⃣ How to Call
+BEGIN
+  emp_dept_pkg.show_emp_details;
+END;
+/
+
+
+-------------------------------------------------------------------------------------------
+📦  PACKAGE WITH ONLY PROCEDURE (WITH PARAMETER)
+
+1️⃣ Package Specification
+CREATE OR REPLACE PACKAGE emp_dept_pkg IS
+  PROCEDURE show_emp_details(p_empno emp.empno%TYPE);
+END emp_dept_pkg;
+/
+
+2️⃣ Package Body
+
+👉 All logic is inside the procedure
+
+CREATE OR REPLACE PACKAGE BODY emp_dept_pkg IS
+
+  PROCEDURE show_emp_details(p_empno emp.empno%TYPE) IS
+
+    -- Local variables
+    v_emp  emp%ROWTYPE;
+    v_dept dept%ROWTYPE;
+
+  BEGIN
+    DBMS_OUTPUT.PUT_LINE('🔄 Fetching details for EMPNO = ' || p_empno);
+
+    -- Fetch EMP data
+    SELECT *
+    INTO   v_emp
+    FROM   emp
+    WHERE  empno = p_empno;
+
+    -- Fetch DEPT data
+    SELECT *
+    INTO   v_dept
+    FROM   dept
+    WHERE  deptno = v_emp.deptno;
+
+    -- Print output
+    DBMS_OUTPUT.PUT_LINE('----------------------------');
+    DBMS_OUTPUT.PUT_LINE('Employee Details');
+    DBMS_OUTPUT.PUT_LINE('----------------------------');
+    DBMS_OUTPUT.PUT_LINE('Emp No   : ' || v_emp.empno);
+    DBMS_OUTPUT.PUT_LINE('Name     : ' || v_emp.ename);
+    DBMS_OUTPUT.PUT_LINE('Job      : ' || v_emp.job);
+    DBMS_OUTPUT.PUT_LINE('Salary   : ' || v_emp.sal);
+    DBMS_OUTPUT.PUT_LINE('Dept     : ' || v_dept.dname);
+    DBMS_OUTPUT.PUT_LINE('Location : ' || v_dept.loc);
+
+  EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+      DBMS_OUTPUT.PUT_LINE('❌ Employee not found for EMPNO = ' || p_empno);
+
+    WHEN OTHERS THEN
+      DBMS_OUTPUT.PUT_LINE('❌ Error: ' || SQLERRM);
+  END show_emp_details;
+
+END emp_dept_pkg;
+/
+
+3️⃣ How to Call
+BEGIN
+  emp_dept_pkg.show_emp_details(7369);
+END;
+/
+
+
+👉 Try another EMPNO dynamically:
+
+BEGIN
+  emp_dept_pkg.show_emp_details(7839);
+END;
+/
+
+
+-------------------------------------------------------------------------------------------
+📦 PACKAGE WITH MULTIPLE PROCEDURES
+
+1️⃣ Package Specification
+
+👉 Only procedure declarations
+
+CREATE OR REPLACE PACKAGE emp_dept_pkg IS
+
+  -- Procedure 1: Show employee details
+  PROCEDURE show_emp(
+    p_empno emp.empno%TYPE
+  );
+
+  -- Procedure 2: Show department details
+  PROCEDURE show_dept(
+    p_deptno dept.deptno%TYPE
+  );
+
+  -- Procedure 3: Show employee + department details
+  PROCEDURE show_emp_dept(
+    p_empno emp.empno%TYPE
+  );
+
+END emp_dept_pkg;
+/
+
+2️⃣ Package Body
+
+👉 Full implementation
+
+CREATE OR REPLACE PACKAGE BODY emp_dept_pkg IS
+
+  /* ================================
+     Procedure 1: Employee Details
+     ================================ */
+  PROCEDURE show_emp(p_empno emp.empno%TYPE) IS
+    v_emp emp%ROWTYPE;
+  BEGIN
+    SELECT *
+    INTO   v_emp
+    FROM   emp
+    WHERE  empno = p_empno;
+
+    DBMS_OUTPUT.PUT_LINE('Employee Details');
+    DBMS_OUTPUT.PUT_LINE('Emp No   : ' || v_emp.empno);
+    DBMS_OUTPUT.PUT_LINE('Name     : ' || v_emp.ename);
+    DBMS_OUTPUT.PUT_LINE('Job      : ' || v_emp.job);
+    DBMS_OUTPUT.PUT_LINE('Salary   : ' || v_emp.sal);
+
+  EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+      DBMS_OUTPUT.PUT_LINE('❌ Employee not found');
+  END show_emp;
+
+
+  /* ================================
+     Procedure 2: Department Details
+     ================================ */
+  PROCEDURE show_dept(p_deptno dept.deptno%TYPE) IS
+    v_dept dept%ROWTYPE;
+  BEGIN
+    SELECT *
+    INTO   v_dept
+    FROM   dept
+    WHERE  deptno = p_deptno;
+
+    DBMS_OUTPUT.PUT_LINE('Department Details');
+    DBMS_OUTPUT.PUT_LINE('Dept No  : ' || v_dept.deptno);
+    DBMS_OUTPUT.PUT_LINE('Name     : ' || v_dept.dname);
+    DBMS_OUTPUT.PUT_LINE('Location : ' || v_dept.loc);
+
+  EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+      DBMS_OUTPUT.PUT_LINE('❌ Department not found');
+  END show_dept;
+
+
+  /* =========================================
+     Procedure 3: Employee + Department
+     ========================================= */
+  PROCEDURE show_emp_dept(p_empno emp.empno%TYPE) IS
+    v_emp  emp%ROWTYPE;
+    v_dept dept%ROWTYPE;
+  BEGIN
+    SELECT *
+    INTO   v_emp
+    FROM   emp
+    WHERE  empno = p_empno;
+
+    SELECT *
+    INTO   v_dept
+    FROM   dept
+    WHERE  deptno = v_emp.deptno;
+
+    DBMS_OUTPUT.PUT_LINE('Employee + Department');
+    DBMS_OUTPUT.PUT_LINE('Emp Name : ' || v_emp.ename);
+    DBMS_OUTPUT.PUT_LINE('Job      : ' || v_emp.job);
+    DBMS_OUTPUT.PUT_LINE('Dept     : ' || v_dept.dname);
+    DBMS_OUTPUT.PUT_LINE('Location : ' || v_dept.loc);
+
+  EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+      DBMS_OUTPUT.PUT_LINE('❌ Employee or Department not found');
+  END show_emp_dept;
+
+END emp_dept_pkg;
+/
+
+3️⃣ How to Call Each Procedure
+▶️ Call Procedure 1
+BEGIN
+  emp_dept_pkg.show_emp(7369);
+END;
+/
+
+▶️ Call Procedure 2
+BEGIN
+  emp_dept_pkg.show_dept(20);
+END;
+/
+
+▶️ Call Procedure 3
+BEGIN
+  emp_dept_pkg.show_emp_dept(7839);
+END;
+/
+
+-------------------------------------------------------------------------------------------
+📦 PACKAGE WITH FUNCTION (NO PARAMETER)
+
+1️⃣ Package Specification
+
+CREATE OR REPLACE PACKAGE emp_func_pkg IS
+  FUNCTION get_emp_count RETURN NUMBER;
+END emp_func_pkg;
+/
+
+2️⃣ Package Body
+
+CREATE OR REPLACE PACKAGE BODY emp_func_pkg IS
+
+  FUNCTION get_emp_count RETURN NUMBER IS
+    v_count NUMBER;
+  BEGIN
+    SELECT COUNT(*)
+    INTO   v_count
+    FROM   emp;
+
+    RETURN v_count;
+
+  EXCEPTION
+    WHEN OTHERS THEN
+      RETURN 0;
+  END get_emp_count;
+
+END emp_func_pkg;
+/
+
+3️⃣ How to Call the Function
+
+▶️ Call from SQL
+
+SELECT emp_func_pkg.get_emp_count
+FROM dual;
+
+▶️ Call from PL/SQL
+
+BEGIN
+  DBMS_OUTPUT.PUT_LINE(
+    'Total Employees: ' || emp_func_pkg.get_emp_count
+  );
+END;
+/
+
+
+-------------------------------------------------------------------------------------------
+📦 PACKAGE WITH FUNCTION (WITH PARAMETER)
+
+1️⃣ Package Specification
+
+CREATE OR REPLACE PACKAGE emp_func_pkg IS
+  FUNCTION get_emp_salary(p_empno emp.empno%TYPE)
+    RETURN emp.sal%TYPE;
+END emp_func_pkg;
+/
+
+2️⃣ Package Body
+CREATE OR REPLACE PACKAGE BODY emp_func_pkg IS
+
+  FUNCTION get_emp_salary(p_empno emp.empno%TYPE)
+    RETURN emp.sal%TYPE
+  IS
+    v_salary emp.sal%TYPE;
+  BEGIN
+    SELECT sal
+    INTO   v_salary
+    FROM   emp
+    WHERE  empno = p_empno;
+
+    RETURN v_salary;
+
+  EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+      RETURN NULL;
+
+    WHEN OTHERS THEN
+      RETURN NULL;
+  END get_emp_salary;
+
+END emp_func_pkg;
+/
+
+3️⃣ How to Call the Function
+▶️ Call from SQL
+SELECT emp_func_pkg.get_emp_salary(7369) AS salary
+FROM dual;
+
+▶️ Call from PL/SQL
+BEGIN
+  DBMS_OUTPUT.PUT_LINE(
+    'Salary: ' || emp_func_pkg.get_emp_salary(7839)
+  );
+END;
+/
+-------------------------------------------------------------------------------------------
+📦 PACKAGE WITH PROCEDURE + CURSOR (EMP)
+
+Package Spec
+
+CREATE OR REPLACE PACKAGE emp_cursor_pkg IS
+  PROCEDURE show_dept_emp(p_deptno emp.deptno%TYPE);
+END emp_cursor_pkg;
+/
+
+Package Body
+
+CREATE OR REPLACE PACKAGE BODY emp_cursor_pkg IS
+
+  PROCEDURE show_dept_emp(p_deptno emp.deptno%TYPE) IS
+
+    CURSOR emp_cur IS
+      SELECT empno, ename, job, sal
+      FROM emp
+      WHERE deptno = p_deptno;
+
+    v_emp emp_cur%ROWTYPE;
+
+  BEGIN
+    OPEN emp_cur;
+
+    LOOP
+      FETCH emp_cur INTO v_emp;
+      EXIT WHEN emp_cur%NOTFOUND;
+
+      DBMS_OUTPUT.PUT_LINE(
+        v_emp.empno || ' - ' ||
+        v_emp.ename || ' - ' ||
+        v_emp.job   || ' - ' ||
+        v_emp.sal
+      );
+    END LOOP;
+
+    CLOSE emp_cur;
+
+  EXCEPTION
+    WHEN OTHERS THEN
+      IF emp_cur%ISOPEN THEN
+        CLOSE emp_cur;
+      END IF;
+      DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+  END show_dept_emp;
+
+END emp_cursor_pkg;
+/
+
+-------------------------------------------------------------------------------------------
+📦 PACKAGE WITH VARIABLE + PROCEDURE + FUNCTION
+
+1️⃣ Package Specification
+
+👉 Declare WHAT is available
+
+CREATE OR REPLACE PACKAGE emp_pkg IS
+
+  -- 🔹 Package variable
+  g_empno emp.empno%TYPE;
+
+  -- 🔹 Procedure
+  PROCEDURE set_empno(p_empno emp.empno%TYPE);
+
+  -- 🔹 Function
+  FUNCTION get_emp_salary RETURN emp.sal%TYPE;
+
+END emp_pkg;
+/
+
+2️⃣ Package Body
+
+👉 Define HOW it works
+
+CREATE OR REPLACE PACKAGE BODY emp_pkg IS
+
+  -- Procedure to set employee number
+  PROCEDURE set_empno(p_empno emp.empno%TYPE) IS
+  BEGIN
+    g_empno := p_empno;
+    DBMS_OUTPUT.PUT_LINE('Employee number set to ' || g_empno);
+  END set_empno;
+
+
+  -- Function to get salary using package variable
+  FUNCTION get_emp_salary RETURN emp.sal%TYPE IS
+    v_salary emp.sal%TYPE;
+  BEGIN
+    SELECT sal
+    INTO   v_salary
+    FROM   emp
+    WHERE  empno = g_empno;
+
+    RETURN v_salary;
+
+  EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+      DBMS_OUTPUT.PUT_LINE('Employee not found');
+      RETURN NULL;
+  END get_emp_salary;
+
+END emp_pkg;
+/
+
+3️⃣ How to Use the Package
+BEGIN
+  -- Set value using procedure
+  emp_pkg.set_empno(7369);
+
+  -- Use function
+  DBMS_OUTPUT.PUT_LINE(
+    'Salary: ' || emp_pkg.get_emp_salary
+  );
+END;
+/
+
+4️⃣ Sample Output
+Employee number set to 7369
+Salary: 800
+
+-------------------------------------------------------------------------------------------
+📦 HIRE & FIRE PACKAGE (EMP TABLE)
+1️⃣ EMP TABLE (Assumption – Classic Oracle)
+EMP(empno, ename, job, mgr, hiredate, sal, comm, deptno)
+
+2️⃣ Package Specification
+
+👉 WHAT is available
+
+CREATE OR REPLACE PACKAGE emp_hr_pkg IS
+
+  -- variable
+  g_empno emp.empno%TYPE;
+
+  -- procedures
+  PROCEDURE hire_emp(
+    p_empno   emp.empno%TYPE,
+    p_ename   emp.ename%TYPE,
+    p_job     emp.job%TYPE,
+    p_sal     emp.sal%TYPE,
+    p_deptno  emp.deptno%TYPE
+  );
+
+  PROCEDURE fire_emp(
+    p_empno emp.empno%TYPE
+  );
+
+  -- function
+  FUNCTION is_emp_exist(
+    p_empno emp.empno%TYPE
+  ) RETURN BOOLEAN;
+
+END emp_hr_pkg;
+/
+
+3️⃣ Package Body
+
+👉 HOW it works
+
+CREATE OR REPLACE PACKAGE BODY emp_hr_pkg IS
+
+  -- 🔍 Check employee existence
+  FUNCTION is_emp_exist(p_empno emp.empno%TYPE)
+    RETURN BOOLEAN
+  IS
+    v_count NUMBER;
+  BEGIN
+    SELECT COUNT(*)
+    INTO   v_count
+    FROM   emp
+    WHERE  empno = p_empno;
+
+    RETURN v_count > 0;
+  END is_emp_exist;
+
+
+  -- 👨‍💼 HIRE employee
+  PROCEDURE hire_emp(
+    p_empno   emp.empno%TYPE,
+    p_ename   emp.ename%TYPE,
+    p_job     emp.job%TYPE,
+    p_sal     emp.sal%TYPE,
+    p_deptno  emp.deptno%TYPE
+  ) IS
+  BEGIN
+    IF is_emp_exist(p_empno) THEN
+      DBMS_OUTPUT.PUT_LINE('❌ Employee already exists');
+      RETURN;
+    END IF;
+
+    INSERT INTO emp (
+      empno, ename, job, hiredate, sal, deptno
+    )
+    VALUES (
+      p_empno, p_ename, p_job, SYSDATE, p_sal, p_deptno
+    );
+
+    DBMS_OUTPUT.PUT_LINE('✅ Employee hired successfully');
+
+  EXCEPTION
+    WHEN OTHERS THEN
+      DBMS_OUTPUT.PUT_LINE('❌ Hire failed: ' || SQLERRM);
+  END hire_emp;
+
+
+  -- 🔥 FIRE employee
+  PROCEDURE fire_emp(p_empno emp.empno%TYPE) IS
+  BEGIN
+    IF NOT is_emp_exist(p_empno) THEN
+      DBMS_OUTPUT.PUT_LINE('❌ Employee not found');
+      RETURN;
+    END IF;
+
+    DELETE FROM emp
+    WHERE empno = p_empno;
+
+    DBMS_OUTPUT.PUT_LINE('🔥 Employee fired successfully');
+
+  EXCEPTION
+    WHEN OTHERS THEN
+      DBMS_OUTPUT.PUT_LINE('❌ Fire failed: ' || SQLERRM);
+  END fire_emp;
+
+END emp_hr_pkg;
+/
+
+4️⃣ How to Use (REAL-TIME FLOW)
+▶️ Hire Employee
+
+BEGIN
+  emp_hr_pkg.hire_emp(
+    9001,
+    'DHARMA',
+    'DEVELOPER',
+    35000,
+    10
+  );
+END;
+/
+
+▶️ Fire Employee
+
+BEGIN
+  emp_hr_pkg.fire_emp(9001);
+END;
+/
+
+-------------------------------------------------------------------------------------------
