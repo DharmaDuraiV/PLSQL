@@ -3,7 +3,8 @@
 	PL/SQL is a procedural language and it is extension of SQL.
 	It is developed by Oracle
 	PL/SQL was introduced in Oracle version 6.0, around 1991
-	A procedural language is a type of programming language that uses a step-by-step, instruction-based approach to solve problems by using conditions, loops, and variables.
+	A procedural language is a type of programming language 
+	It uses a step-by-step, instruction-based approach to solve problems by using conditions, loops, and variables.
 	It is the combination of procedural ,data manuplation language.
 	PL/SQL is a mix of:
 	  Procedural Language (like IF, FOR, WHILE)
@@ -86,7 +87,7 @@ SYNTAX  :
 	| Type             | Description                                          |
 	| ---------------- | ---------------------------------------------------- |
 	| Procedure 	   | Performs a task (may or may not return value)        |
-	| Function	   | Must return a value                                  |
+	| Function	  	   | Must return a value                                  |
 	| Trigger          | Runs **automatically** on insert/update/delete       |
 	| Package          | Collection of related procedures/functions/variables |
 	| Package Body     | Contains the actual code for the package items       |
