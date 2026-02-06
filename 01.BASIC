@@ -30,7 +30,7 @@ BEGIN
   -- • TCL (COMMIT, ROLLBACK)
   -- • SELECT … INTO …  (fetch data into variables)
   -- • Procedural logic (IF…THEN, LOOP, etc.)
-
+  -- • DDL
 -- 3) EXCEPTION Section (optional)
 EXCEPTION
   -- • Exception handlers
